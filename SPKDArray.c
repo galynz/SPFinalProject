@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define LEFT_INDEX 0
+#define RIGHT_INDEX 1
+#define MOVED_POINT_INDEX -1
+
 typedef struct SPKDArray {
     int num;
     int dim;
@@ -12,10 +16,6 @@ struct KDArrayDimCoor {
     double coor;
     int index;
 }
-
-#define LEFT_INDEX 0
-#define RIGHT_INDEX 1
-#define MOVED_POINT_INDEX -1
 
 SPKDArray init(SPPoint* arr, int size){
     SPPoint* arr_copy;
@@ -170,4 +170,20 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     
     return ret_array;
     
+}
+
+int get_spread(SPKDArray kd_arr, int dim){
+    int min_index, max_index, max_value, min_value;
+    min_index = kd_arr->matrix[dim][0];
+    max_index = kd_arr->matrix[dim][kd_arr->num-1];
+    min_value = spPointGetAxisCoor(kd_arr->arr[min_index], dim);
+    max_value = spPointGetAxisCoor(kd_arr->arr[max_index], dim);
+    return (max_value - min_value);
+}
+
+int get_median(SPKDArray kd_arr, int dim){
+    int median_index, median_value;
+    median_index = (kd_arr->num)/2;
+    median_value = spPointGetAxisCoor(kd_arr->arr[median_index], dim)
+    return median_value;
 }
