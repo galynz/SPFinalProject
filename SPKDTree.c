@@ -9,6 +9,7 @@
 
 
 typedef enum { MAX_SPREAD, RANDOM, INCREMENTAL } SplitMethod;
+typedef enum {false, true} bool;
 
 typedef struct SPKDTree {
     int dim;
@@ -84,4 +85,13 @@ SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_di
     tree->right = init_tree(splitted_kd_arr[RIGHT], size, split_method, split_dim);
     tree->data = NULL;
     return tree;
+}
+
+
+bool isLeaf(SPKDTree node){
+    //checking if a node is a leaf (it's value is INVALID)
+    if (node->val == INVALID){
+        return true;
+    }
+    return false;
 }
