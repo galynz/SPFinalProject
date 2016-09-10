@@ -1,9 +1,10 @@
 #ifndef SPCONFIG_H_
 #define SPCONFIG_H_
 
+#include "common.h"
+
 #include <stdbool.h>
 #include <stdio.h>
-#include "SPLogger.h"
 
 /**
  * A data-structure which is used for configuring the system.
@@ -14,12 +15,15 @@ typedef enum sp_config_msg_t {
 	SP_CONFIG_MISSING_PREFIX,
 	SP_CONFIG_MISSING_SUFFIX,
 	SP_CONFIG_MISSING_NUM_IMAGES,
+    SP_CONFIG_MISSING_NON_DEFAULT_VALUE,
 	SP_CONFIG_CANNOT_OPEN_FILE,
 	SP_CONFIG_ALLOC_FAIL,
 	SP_CONFIG_INVALID_INTEGER,
 	SP_CONFIG_INVALID_STRING,
 	SP_CONFIG_INVALID_ARGUMENT,
 	SP_CONFIG_INDEX_OUT_OF_RANGE,
+    SP_CONFIG_INVALID_LINE,
+    SP_CONFIG_CONSTRAINT_NOT_MET,
 	SP_CONFIG_SUCCESS
 } SP_CONFIG_MSG;
 
@@ -92,6 +96,34 @@ bool spConfigMinimalGui(const SPConfig config, SP_CONFIG_MSG* msg);
 int spConfigGetNumOfImages(const SPConfig config, SP_CONFIG_MSG* msg);
 
 /*
+* Returns the number of similar images set in the configuration file, i.e the value
+* of spNumOfSimilarImages.
+*
+* @param config - the configuration structure
+* @assert msg != NULL
+* @param msg - pointer in which the msg returned by the function is stored
+* @return positive integer in success, negative integer otherwise.
+*
+* - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+* - SP_CONFIG_SUCCESS - in case of success
+*/
+int spConfigGetNumOfSimilarImages(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
+* Returns the KNN set in the configuration file, i.e the value
+* of spKNN.
+*
+* @param config - the configuration structure
+* @assert msg != NULL
+* @param msg - pointer in which the msg returned by the function is stored
+* @return positive integer in success, negative integer otherwise.
+*
+* - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+* - SP_CONFIG_SUCCESS - in case of success
+*/
+int spConfigGetKNN(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/*
  * Returns the number of features to be extracted. i.e the value
  * of spNumOfFeatures.
  *
@@ -117,6 +149,19 @@ int spConfigGetNumOfFeatures(const SPConfig config, SP_CONFIG_MSG* msg);
  * - SP_CONFIG_SUCCESS - in case of success
  */
 int spConfigGetPCADim(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/**
+* Returns the the kd-tree split method set by the config. i.e the value of spKDTreeSplitMethod.
+*
+* @param config - the configuration structure
+* @assert msg != NULL
+* @param msg - pointer in which the msg returned by the function is stored
+* @return one of {MAX_SPREAD, RANDOM, INCREMENTAL}, negative integer otherwise.
+*
+* - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+* - SP_CONFIG_SUCCESS - in case of success
+*/
+KDTREE_SPLIT_METHOD spConfigGetKDTreeSplitMethod(const SPConfig config, SP_CONFIG_MSG* msg);
 
 /**
  * Given an index 'index' the function stores in imagePath the full path of the
@@ -163,6 +208,31 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
  *  - SP_CONFIG_SUCCESS - in case of success
  */
 SP_CONFIG_MSG spConfigGetPCAPath(char* pcaPath, const SPConfig config);
+
+/*
+* Returns the Logger level set in the configuration file, i.e the value
+* of spLoggerLevel.
+*
+* @param config - the configuration structure
+* @assert msg != NULL
+* @param msg - pointer in which the msg returned by the function is stored
+* @return one of {1, 2, 3, 4}, negative integer otherwise.
+*
+* - SP_CONFIG_INVALID_ARGUMENT - if config == NULL
+* - SP_CONFIG_SUCCESS - in case of success
+*/
+int spConfigGetLoggerLevel(const SPConfig config, SP_CONFIG_MSG* msg);
+
+/**
+* The function stores in loggerFilename the name of the log file set by the config.
+*
+* @param loggerFilename - an address to store the result in, it must contain enough space.
+* @param config - the configuration structure
+* @return
+*  - SP_CONFIG_INVALID_ARGUMENT - if imagePath == NULL or config == NULL
+*  - SP_CONFIG_SUCCESS - in case of success
+*/
+SP_CONFIG_MSG spConfigGetLoggerFilename(char* loggerFilename, const SPConfig config);
 
 /**
  * Frees all memory resources associate with config. 
