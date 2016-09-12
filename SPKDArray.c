@@ -192,8 +192,22 @@ SPKDArray init_array(SPPoint* arr, int size){
     SPKDArray kd_array = NULL;
     int dim = 0, i = 0;
     
-    //Creating the kd array
+    //Validating the array
+    if (size <= 0){
+        return NULL;
+    }
     dim = spPointGetDimension(arr[0]);
+    if (dim <= 0){
+        return NULL;
+    }
+    
+    //Making sure all the points have the same dim 
+    for (i=0; i<size; i++){
+        if ( spPointGetDimension(arr[0]) != dim ){
+            return NULL;
+        }
+    }
+    //Creating the kd array
     kd_array = create_kd_array(arr, size, dim);
     
     //Filling the matrix
