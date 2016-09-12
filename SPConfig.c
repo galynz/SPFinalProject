@@ -340,7 +340,7 @@ static bool getBoolVal(char * var_name, const SPConfig config, SP_CONFIG_MSG* ms
 
 	if (!config) {
 		*msg = SP_CONFIG_INVALID_ARGUMENT;
-		return -1;
+		return false;
 	}
 
 	var = getVarOrDefaultValue(config, var_name);
