@@ -62,7 +62,7 @@ SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_di
         //Finding the dim with the max spread
         max_dim = INVALID;
         max_spread = INVALID;
-        for (i=0; i<=dim; i++){
+        for (i=0; i<dim; i++){
             cur_spread = get_spread(kd_arr, i);
             if ( cur_spread > max_spread ){
                 //If the current spread is greater than the max spread, 
