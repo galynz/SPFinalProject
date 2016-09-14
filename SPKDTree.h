@@ -7,6 +7,8 @@ typedef enum { MAX_SPREAD, RANDOM, INCREMENTAL } SplitMethod;
 
 typedef struct sp_kd_tree *SPKDTree;
 
+typedef enum {SUCCESS, FAILURE} status;
+
 /**
  * Creates a new kd-tree struct by creating a kd-array
  * and spliting it to left and right kd-arrays according to split_method.
@@ -30,7 +32,7 @@ SPKDTree initTree(SPPoint* arr, int size, SplitMethod split_method);
  * @param p - a SPPoint to search.
  */
 
-void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p);
+status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p);
 
 /**
  * A recursive function that frees all the memory allocated when the tree was created.
