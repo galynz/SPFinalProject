@@ -148,7 +148,7 @@ status searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint
         return FAILURE;
     }
     queue_peek_last = spListElementGetValue(spBPQueuePeekLast(bpq));
-    if ( queue_peek_last == NULL ){
+    if ( queue_peek_last == INVALID ){
         return FAILURE;
     }
     if (spBPQueueIsFull(bpq) == false || 
@@ -177,7 +177,7 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     if (isLeaf(curr) == true){
         curr_elem = spListElementCreate(spPointGetIndex(curr->data),
                         spPointL2SquaredDistance(p, curr->data));
-        if (curr_elem == INVALID){
+        if (curr_elem == NULL){
             return FAILURE;
         }
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
