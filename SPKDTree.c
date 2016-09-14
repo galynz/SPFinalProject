@@ -11,6 +11,8 @@
 #define INVALID -1
 #define LEFT 0
 #define RIGHT 1
+#define INIT_PREV_DIM -1
+#define EMPTY_ARR 0
 
 
 //typedef enum { MAX_SPREAD, RANDOM, INCREMENTAL } SplitMethod;
@@ -24,18 +26,30 @@ typedef struct sp_kd_tree {
     SPPoint data;
 }*SPKDTree;
 
+/**
+A helper function that finds the max spread out of all the dimension.
+*/
+int getMaxSpreadDim(SPKDArray kd_arr, int dim) {
+	int max_dim = 0;
+	double cur_spread = 0, max_spread = 0;
+	int i = 0;
+	//Finding the dim with the max spread
+	for (i = 0; i<dim; i++) {
+		cur_spread = getSpread(kd_arr, i);
+		if (cur_spread > max_spread) {
+			//If the current spread is greater than the max spread, 
+			//update max dim to be the current dim
+			max_spread = cur_spread;
+			max_dim = i;
+		}
+	}
+	return max_dim;
+}
 
-SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_dim){
-    SPKDArray kd_arr = NULL;
+SPKDTree initTreeRec(SPPoint* arr, int size, SplitMethod split_method, int prev_dim, SPKDArray kd_arr){
 	SPKDArray* splitted_kd_arr = NULL;
     SPKDTree tree = NULL;
-	int i = 0, dim = 0, split_dim = 0, max_dim = 0;
-	double max_spread = 0, cur_spread = 0;
-    
-    if (size == INVALID || prev_dim == INVALID ){
-        //TODO: add logger comment
-        return NULL;
-    }
+	int i = 0, dim = 0, split_dim = 0;
     
     tree = (SPKDTree)malloc(sizeof(*tree));
     if (tree==NULL){
@@ -43,8 +57,8 @@ SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_di
         return NULL;
     }
     
+    //If size(array) = 1, creates a node
     if ( size == SINGLE_NODE ){
-        //If len(array) = 1, create a node
         tree->dim = INVALID;
         tree->val = INVALID;
         tree->left = NULL;
@@ -53,25 +67,11 @@ SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_di
         return tree;
     }
     
-    //Creating a kd array
-    kd_arr = init_array(arr, size);
-    dim = get_dim(kd_arr);
+    dim = getDim(kd_arr);
     
     //Decieding which dim to split according to
     if (split_method == MAX_SPREAD){
-        //Finding the dim with the max spread
-        max_dim = INVALID;
-        max_spread = INVALID;
-        for (i=0; i<dim; i++){
-            cur_spread = get_spread(kd_arr, i);
-            if ( cur_spread > max_spread ){
-                //If the current spread is greater than the max spread, 
-                //update max dim to be the current dim
-                max_spread = cur_spread;
-                max_dim = i;
-            }
-        }
-        split_dim = max_dim;
+        split_dim = getMaxSpreadDim(kd_arr, dim);
     } 
     else if (split_method == RANDOM ){
         //choosing a random dim
@@ -81,7 +81,7 @@ SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_di
         //incremeting the previous dim
         split_dim = (prev_dim + 1)%dim;
     } else {
-        destroy_kd_array(kd_arr, dim);
+        destroyKdArray(kd_arr, dim);
         free(tree);
         return NULL;
     }
@@ -90,15 +90,46 @@ SPKDTree init_tree(SPPoint* arr, int size, SplitMethod split_method, int prev_di
     //kd_arr = init(arr, size);
     splitted_kd_arr = split(kd_arr, split_dim);
     tree->dim = split_dim;
-    tree->val = get_median(kd_arr, split_dim);
-    tree->left = init_tree(get_arr(splitted_kd_arr[LEFT]), get_size(splitted_kd_arr[LEFT]), split_method, split_dim);
-    tree->right = init_tree(get_arr(splitted_kd_arr[RIGHT]),get_size(splitted_kd_arr[RIGHT]), split_method, split_dim);
+    tree->val = getMedian(kd_arr, split_dim);
+    tree->left = initTreeRec(getArr(splitted_kd_arr[LEFT]), getSize(splitted_kd_arr[LEFT]), split_method, split_dim, splitted_kd_arr[LEFT]);
+    tree->right = initTreeRec(getArr(splitted_kd_arr[RIGHT]),getSize(splitted_kd_arr[RIGHT]), split_method, split_dim, splitted_kd_arr[RIGHT]);
     tree->data = NULL;
     
-    destroy_kd_array(kd_arr, dim);
+    //Destroying the kd-arrays created in the current iteration
+    destroyKdArray(splitted_kd_arr[LEFT], dim);
+    destroyKdArray(splitted_kd_arr[RIGHT], dim);
     return tree;
 }
 
+SPKDTree initTree(SPPoint* arr, int size, SplitMethod split_method) {
+	SPKDArray kd_arr = NULL;
+	SPKDTree tree = NULL;
+	int dim = 0;
+
+	if (size <= EMPTY_ARR) {
+		//TODO: add logger comment
+		return NULL;
+	}
+
+	//Creating a kd array
+	kd_arr = initArray(arr, size);
+	if (kd_arr == NULL) {
+		return NULL;
+	}
+
+	//Creating the kd tree
+	tree = initTreeRec(arr, size, split_method, INIT_PREV_DIM, kd_arr);
+	if (tree == NULL) {
+		destroyKdArray(kd_arr, dim);
+		return NULL;
+	}
+
+	//Destroying the kd array
+	dim = getDim(kd_arr);
+	destroyKdArray(kd_arr, dim);
+
+	return tree;
+}
 
 bool isLeaf(SPKDTree node){
     //checking if a node is a leaf (it's value is INVALID)
@@ -158,9 +189,11 @@ void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     
 }
 
-void destroy_tree(SPKDTree tree){
+void destroyTree(SPKDTree tree){
     if (tree == NULL) return;
-    destroy_tree(tree->left);
-    destroy_tree(tree->right);
+    //Recursivly destroy left and right sub trees
+    destroyTree(tree->left);
+    destroyTree(tree->right);
     spPointDestroy(tree->data);
+    free(tree);
 }
