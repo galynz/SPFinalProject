@@ -166,8 +166,7 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
     SPListElement curr_elem = NULL;
     SP_BPQUEUE_MSG enqueue_msg;
-    double curr_dim_distance = 0, curr_dim_distance_squared = 0, 
-           queue_peek_last = 0;
+    double curr_dim_distance = 0, curr_dim_distance_squared = 0;
     status ret_status;
     
     if (curr == NULL){
@@ -182,7 +181,7 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
             return FAILURE;
         }
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
-        if (SP_BPQUEUE_MSG != SP_BPQUEUE_SUCCESS){
+        if (enqueue_msg != SP_BPQUEUE_SUCCESS){
             return FAILURE;
         }
         return SUCCESS;
