@@ -6,10 +6,11 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#define MAX_FILE_PATH (1024 + 1) /* 1024 chars + 1 null terminator */
-#define MAX_LINE_LEN  (1024 + 1) /* max len of a line in the config file */
-#define MAX_SYSTEM_VARIABLE_STR_LEN (1024 + 1) /* same reasoning */
+#define MAX_LINE_LEN  (1024 + 1) /* max len of a line in the config file, plus null */
+#define MAX_SYSTEM_VARIABLE_STR_LEN (1024 + 1) /* max str var len, plus null */
 #define MAX_INT_STR_LEN (11 + 1) /* max size of decimal string int plus null */
+
+#define FEATS_FILE_SUFFIX ".feats" /* the suffix of features file */
 
 /* a union for the data of system variable, allows convinant access */
 union system_variabale_data {
@@ -482,6 +483,28 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
 	}
 
 	sprintf(imagePath, "%s%s%d%s", path->string_value, prefix->string_value, index, suffix->string_value);
+
+	return SP_CONFIG_SUCCESS;
+}
+
+SP_CONFIG_MSG spConfigGetFeatsPath(char* featsPath, const SPConfig config,
+	int index) {
+	const union system_variabale_data * numOfImages = NULL, *path = NULL, *prefix = NULL;
+    char * suffix = FEATS_FILE_SUFFIX;
+	if (!featsPath || !config) {
+		return SP_CONFIG_INVALID_ARGUMENT;
+	}
+
+	numOfImages = getVarOrDefaultValue(config, "spNumOfImages");
+	path = getVarOrDefaultValue(config, "spImagesDirectory");
+	prefix = getVarOrDefaultValue(config, "spImagesPrefix");
+	assert(numOfImages && path && prefix && suffix);
+	
+	if (index >= numOfImages->int_value) {
+		return SP_CONFIG_INDEX_OUT_OF_RANGE;
+	}
+
+	sprintf(featsPath, "%s%s%d%s", path->string_value, prefix->string_value, index, suffix);
 
 	return SP_CONFIG_SUCCESS;
 }

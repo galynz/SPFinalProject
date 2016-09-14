@@ -192,6 +192,22 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
 		int index);
 
 /**
+* Given an index 'index' the function stores in featsPath the full path of the
+* ith image features file.
+*
+* @param featsPath - an address to store the result in, it must contain enough space.
+* @param config - the configuration structure
+* @param index - the index of the image.
+*
+* @return
+* - SP_CONFIG_INVALID_ARGUMENT - if imagePath == NULL or config == NULL
+* - SP_CONFIG_INDEX_OUT_OF_RANGE - if index >= spNumOfImages
+* - SP_CONFIG_SUCCESS - in case of success
+*/
+SP_CONFIG_MSG spConfigGetFeatsPath(char* featsPath, const SPConfig config,
+	int index)
+
+/**
  * The function stores in pcaPath the full path of the pca file.
  * For example given the values of:
  *  spImagesDirectory = "./images/"
