@@ -24,7 +24,7 @@ typedef struct sp_kd_tree {
     SPKDTree left;
     SPKDTree right;
     SPPoint data;
-}*SPKDTree;
+};
 
 /**
 A helper function that finds the max spread out of all the dimension.
@@ -49,7 +49,7 @@ int getMaxSpreadDim(SPKDArray kd_arr, int dim) {
 SPKDTree initTreeRec(SPPoint* arr, int size, SplitMethod split_method, int prev_dim, SPKDArray kd_arr){
 	SPKDArray* splitted_kd_arr = NULL;
     SPKDTree tree = NULL;
-	int i = 0, dim = 0, split_dim = 0;
+	int dim = 0, split_dim = 0;
     
     tree = (SPKDTree)malloc(sizeof(*tree));
     if (tree==NULL){
@@ -143,7 +143,7 @@ bool isLeaf(SPKDTree node){
 void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
     SPListElement curr_elem = NULL;
-    SP_BPQUEUE_MSG enqueue_msg = NULL;
+    //SP_BPQUEUE_MSG enqueue_msg;
     double curr_dim_distance = 0, curr_dim_distance_squared = 0, 
            queue_peek_last = 0;
     
@@ -158,7 +158,7 @@ void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         if (curr_elem == NULL){
             return;
         }
-		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
+		SP_BPQUEUE_MSG enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
         return;
     }
     
