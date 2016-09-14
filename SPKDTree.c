@@ -177,7 +177,7 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     if (isLeaf(curr) == true){
         curr_elem = spListElementCreate(spPointGetIndex(curr->data),
                         spPointL2SquaredDistance(p, curr->data));
-        if (curr_elem == NULL){
+        if (curr_elem == INVALID){
             return FAILURE;
         }
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
