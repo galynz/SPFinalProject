@@ -50,7 +50,7 @@ static SPKDArray createKdArray(SPPoint* arr, int size, int dim) {
 		free(kd_array);
 		return NULL;
 	}
-	memcpy(kd_array->arr, arr, sizeof(SPPoint*)*size);
+	memcpy(kd_array->arr, arr, sizeof(SPPoint)*size);
 
 	//Allocating the matrix
 	kd_array->matrix = (int**)malloc(dim * sizeof(int*));
