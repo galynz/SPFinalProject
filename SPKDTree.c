@@ -139,7 +139,7 @@ bool isLeaf(SPKDTree node){
  A helper function that searches one of the tree's sides (or both)
  */
 
-status searchSubTree(SPKDTree search_sub, SPKDTree otherת SPBPriorityQueue bpq, SPPoint p){
+status searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPriorityQueue bpq, SPPoint p){
     status ret_status = SUCCESS;
     double queue_peek_last = 0;
     //Searching the sub tree
@@ -181,7 +181,7 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         if (curr_elem == NULL){
             return FAILURE;
         }
-		SP_BPQUEUE_MSG enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
+		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
         if (SP_BPQUEUE_MSG != SP_BPQUEUE_SUCCESS){
             return FAILURE;
         }
