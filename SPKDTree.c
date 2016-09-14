@@ -18,7 +18,7 @@
 //typedef enum { MAX_SPREAD, RANDOM, INCREMENTAL } SplitMethod;
 //typedef enum {false, true} bool;
 
-typedef struct sp_kd_tree {
+struct sp_kd_tree {
     int dim;
     double val;
     SPKDTree left;
