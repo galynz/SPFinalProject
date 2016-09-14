@@ -143,7 +143,7 @@ bool isLeaf(SPKDTree node){
 void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
     SPListElement curr_elem = NULL;
-    SP_BPQUEUE_MSG enqueue_msg;
+    SP_BPQUEUE_MSG enqueue_msg = NULL;
     double curr_dim_distance = 0, curr_dim_distance_squared = 0, 
            queue_peek_last = 0;
     
