@@ -158,7 +158,8 @@ void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         if (curr_elem == NULL){
             return;
         }
-		SP_BPQUEUE_MSG enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
+		//SP_BPQUEUE_MSG enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
+        spBPQueueEnqueue(bpq, curr_elem);
         return;
     }
     
