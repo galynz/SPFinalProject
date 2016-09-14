@@ -14,10 +14,6 @@
 #define INIT_PREV_DIM -1
 #define EMPTY_ARR 0
 
-
-//typedef enum { MAX_SPREAD, RANDOM, INCREMENTAL } SplitMethod;
-//typedef enum {false, true} bool;
-
 struct sp_kd_tree {
     int dim;
     double val;
@@ -139,16 +135,43 @@ bool isLeaf(SPKDTree node){
     return false;
 }
 
+/**
+ A helper function that searches one of the tree's sides (or both)
+ */
 
-void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
+status searchSubTree(SPKDTree search_sub, SPKDTree otherת SPBPriorityQueue bpq, SPPoint p){
+    status ret_status = SUCCESS;
+    double queue_peek_last = 0;
+    //Searching the sub tree
+    ret_status = kNearestNeighbors(search_sub, bpq, p);
+    if ( ret_status == FAILURE ){
+        return FAILURE;
+    }
+    queue_peek_last = spListElementGetValue(spBPQueuePeekLast(bpq));
+    if ( queue_peek_last == NULL ){
+        return FAILURE;
+    }
+    if (spBPQueueIsFull(bpq) == false || 
+        queue_peek_last > curr_dim_distance_squared){
+        //Searching the other sub tree as well
+        ret_status = kNearestNeighbors(other, bpq, p);
+        if (ret_status == FAILURE ){
+            return FAILURE;
+        }
+    }
+    return SUCCESS;
+}
+
+status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
     SPListElement curr_elem = NULL;
-    //SP_BPQUEUE_MSG enqueue_msg;
+    SP_BPQUEUE_MSG enqueue_msg;
     double curr_dim_distance = 0, curr_dim_distance_squared = 0, 
            queue_peek_last = 0;
+    status ret_status;
     
     if (curr == NULL){
-        return;
+        return FAILURE;
     }
     
     //If curr is a leaf, trying to add it to the sp
@@ -156,11 +179,13 @@ void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         curr_elem = spListElementCreate(spPointGetIndex(curr->data),
                         spPointL2SquaredDistance(p, curr->data));
         if (curr_elem == NULL){
-            return;
+            return FAILURE;
         }
-		//SP_BPQUEUE_MSG enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
-        spBPQueueEnqueue(bpq, curr_elem);
-        return;
+		SP_BPQUEUE_MSG enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
+        if (SP_BPQUEUE_MSG != SP_BPQUEUE_SUCCESS){
+            return FAILURE;
+        }
+        return SUCCESS;
     }
     
     //Calculating the distance between curr and the point (in current dim)
@@ -170,24 +195,16 @@ void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Decieding which sub tree to search
     if (spPointGetAxisCoor(p, curr->dim) <= curr->val){
         //Searching the left sub tree
-        kNearestNeighbors(curr->left, bpq, p);
-        queue_peek_last = spListElementGetValue(spBPQueuePeekLast(bpq));
-        if (spBPQueueIsFull(bpq) == false ||
-            queue_peek_last > curr_dim_distance_squared){
-            //Searching the right sub tree as well
-            kNearestNeighbors(curr->right, bpq, p);
-        }
+        ret_status = searchSubTree(curr->left, curr->right, bpq, p);
     } else {
         //Searching the right sub tree
-        kNearestNeighbors(curr->right, bpq, p);
-        queue_peek_last = spListElementGetValue(spBPQueuePeekLast(bpq));
-        if (spBPQueueIsFull(bpq) == false || 
-            queue_peek_last > curr_dim_distance_squared){
-            //Searching the left sub tree as well
-            kNearestNeighbors(curr->left, bpq, p);
-        }
+        ret_status = searchSubTree(curr->right, curr->left, bpq, p);
     }
     
+    if (ret_status == FAILURE){
+        return FAILURE;
+    }
+    return SUCCESS;
 }
 
 void destroyTree(SPKDTree tree){
