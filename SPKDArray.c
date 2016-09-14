@@ -103,7 +103,7 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 
 	//Creating sub kd array
 	sub_kd_array = createKdArray(sub_arr, sub_size, dim);
-	free(sub_arr);
+	//free(sub_arr);
 	if (sub_kd_array == NULL) {
 		return NULL;
 	}
