@@ -38,4 +38,4 @@ void kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p);
 
 void destroyTree(SPKDTree tree);
 
-#endif SPKDTREE_H_
+#endif /* SPKDTREE_H_ */
