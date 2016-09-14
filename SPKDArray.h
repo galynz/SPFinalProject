@@ -21,7 +21,7 @@ typedef struct sp_kd_array *SPKDArray;
  * or memory allocation failed. Otherwise return SPKDArray.
  */
 
-SPKDArray init_array(SPPoint* arr, int size);
+SPKDArray initArray(SPPoint* arr, int size);
 
 /**
  * Splits a kd-array into two kd-arrays, according to the median value of a given coordinate.
@@ -45,7 +45,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor);
  * @return double (max value - min value).
  */
 
-double get_spread(SPKDArray kd_arr, int dim);
+double getSpread(SPKDArray kd_arr, int dim);
 
 /**
  * Calcaulates the median value of a specific dimenstion.
@@ -55,7 +55,7 @@ double get_spread(SPKDArray kd_arr, int dim);
  * @return double (the median).
  */
 
-double get_median(SPKDArray kd_arr, int dim);
+double getMedian(SPKDArray kd_arr, int dim);
 
 /**
  * Gets the number of dimensions of a SPKDArray.
@@ -64,7 +64,7 @@ double get_median(SPKDArray kd_arr, int dim);
  * @return int (arr.dim).
  */
 
-int get_dim(SPKDArray arr);
+int getDim(SPKDArray arr);
 
 /**
  * Gets the SPPoint array of a SPKDArray (kd-array.arr).
@@ -73,7 +73,7 @@ int get_dim(SPKDArray arr);
  * @return an array of SPPoint (SPPoint*).
  */
 
-SPPoint* get_arr(SPKDArray arr);
+SPPoint* getArr(SPKDArray arr);
 
 /**
  * Free all the memory allocations the were made when the SPKDArray was created.
@@ -84,7 +84,7 @@ SPPoint* get_arr(SPKDArray arr);
  * @param dim - the number of dimensions of the SPKDArray.
  */
 
-void destroy_kd_array(SPKDArray kd_array, int dim);
+void destroyKdArray(SPKDArray kd_array, int dim);
 
 /**
  * Gets the size (number of points) of a SPKDArray.
@@ -93,6 +93,6 @@ void destroy_kd_array(SPKDArray kd_array, int dim);
  * @return size (int).
  */
 
-int get_size(SPKDArray kd_arr);
+int getSize(SPKDArray kd_arr);
 
 #endif /* SPKDARRAY_H_ */
