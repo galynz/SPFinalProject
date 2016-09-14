@@ -80,8 +80,7 @@ static SPKDArray createKdArray(SPPoint* arr, int size, int dim) {
 static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int sub_size) {
 	//Initilazing vars
 	int i = 0, all_size = 0, dim = 0, old_index = 0,
-		sub_pos = 0, j = 0, curr_pos = 0,
-		point_index = 0;
+		sub_pos = 0, j = 0, point_index = 0;
 	SPKDArray sub_kd_array = NULL;
 	SPPoint* sub_arr = NULL;
 	int* coor_sorting_arr = NULL;
