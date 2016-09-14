@@ -139,7 +139,7 @@ bool isLeaf(SPKDTree node){
  A helper function that searches one of the tree's sides (or both)
  */
 
-status searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPriorityQueue bpq, SPPoint p){
+status searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint p){
     status ret_status = SUCCESS;
     double queue_peek_last = 0;
     //Searching the sub tree
