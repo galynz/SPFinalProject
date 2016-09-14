@@ -27,7 +27,10 @@ static int compareKDArrayDimCoor(const void * a, const void * b) {
 	return (a_point_coor->coor > b_point_coor->coor) - (a_point_coor->coor < b_point_coor->coor);
 }
 
-static SPKDArray create_kd_array(SPPoint* arr, int size, int dim) {
+/**
+  A helper function that allocates all the memory required when creating a kd array.
+ */
+static SPKDArray createKdArray(SPPoint* arr, int size, int dim) {
 	SPKDArray kd_array = NULL;
 	int i = 0, j = 0;
 
@@ -74,7 +77,7 @@ static SPKDArray create_kd_array(SPPoint* arr, int size, int dim) {
 	return kd_array;
 }
 
-static SPKDArray create_kd_array_sub_array(SPKDArray kd_arr, bool* index_arr, int sub_size) {
+static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int sub_size) {
 	//Initilazing vars
 	int i = 0, all_size = 0, dim = 0, old_index = 0,
 		sub_pos = 0, j = 0, curr_pos = 0,
@@ -100,7 +103,7 @@ static SPKDArray create_kd_array_sub_array(SPKDArray kd_arr, bool* index_arr, in
 	}
 
 	//Creating sub kd array
-	sub_kd_array = create_kd_array(sub_arr, sub_size, dim);
+	sub_kd_array = createKdArray(sub_arr, sub_size, dim);
 	free(sub_arr);
 	if (sub_kd_array == NULL) {
 		return NULL;
@@ -113,7 +116,7 @@ static SPKDArray create_kd_array_sub_array(SPKDArray kd_arr, bool* index_arr, in
 	*/
 	coor_sorting_arr = (int*)malloc(all_size * sizeof(int));
 	if (coor_sorting_arr == NULL) {
-		destroy_kd_array(sub_kd_array, 0);
+		destroyKdArray(sub_kd_array, 0);
 		return NULL;
 	}
 	for (i = 0; i<dim; i++) {
@@ -132,7 +135,7 @@ static SPKDArray create_kd_array_sub_array(SPKDArray kd_arr, bool* index_arr, in
 		//Allocating the i-th row in sub matrix
 		sub_kd_array->matrix[i] = (int*)malloc(sub_size * sizeof(int));
 		if (sub_kd_array->matrix[i] == NULL) {
-			destroy_kd_array(sub_kd_array, i);
+			destroyKdArray(sub_kd_array, i);
 			free(coor_sorting_arr);
 			return NULL;
 		}
@@ -152,7 +155,7 @@ static SPKDArray create_kd_array_sub_array(SPKDArray kd_arr, bool* index_arr, in
 	return sub_kd_array;
 }
 
-static int* sort_points_dim(SPPoint* arr, int coor, int size) {
+static int* sortPointsDim(SPPoint* arr, int coor, int size) {
 	int* index_arr = NULL;
 	struct KDArrayDimCoor* dim_coor = NULL;
 	int i = 0, point_index = 0;
@@ -188,7 +191,7 @@ static int* sort_points_dim(SPPoint* arr, int coor, int size) {
 	return index_arr;
 }
     
-SPKDArray init_array(SPPoint* arr, int size){   
+SPKDArray initArray(SPPoint* arr, int size){   
     SPKDArray kd_array = NULL;
     int dim = 0, i = 0;
     
@@ -208,13 +211,13 @@ SPKDArray init_array(SPPoint* arr, int size){
         }
     }
     //Creating the kd array
-    kd_array = create_kd_array(arr, size, dim);
+    kd_array = createKdArray(arr, size, dim);
     
     //Filling the matrix
     for (i=0; i<dim; i++){
-        kd_array->matrix[i] = sort_points_dim(kd_array->arr, i, size);
+        kd_array->matrix[i] = sortPointsDim(kd_array->arr, i, size);
         if (kd_array->matrix[i] == NULL){
-            destroy_kd_array(kd_array, i-1);
+            destroyKdArray(kd_array, i-1);
             return NULL;
         }
     }
@@ -224,7 +227,7 @@ SPKDArray init_array(SPPoint* arr, int size){
 
 
 
-void destroy_kd_array(SPKDArray kd_array, int dim){
+void destroyKdArray(SPKDArray kd_array, int dim){
     int i = 0;
     
     //Free all allocations
@@ -281,7 +284,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     
 	
     //Creating left and right kd arrays using the indexes
-    left_right_array[left] = create_kd_array_sub_array(kd_arr, left_indexes, left_size);
+    left_right_array[left] = createKdArraySubArray(kd_arr, left_indexes, left_size);
     if (left_right_array[left] == NULL){
         free(left_indexes);
         free(right_indexes);
@@ -289,11 +292,11 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
         return NULL;
     }
 
-    left_right_array[right] = create_kd_array_sub_array(kd_arr, right_indexes, right_size);
+    left_right_array[right] = createKdArraySubArray(kd_arr, right_indexes, right_size);
     if (left_right_array[left] == NULL){
         free(left_indexes);
         free(right_indexes);
-        destroy_kd_array(left_right_array[left], left_right_array[left]->dim);
+        destroyKdArray(left_right_array[left], left_right_array[left]->dim);
         free(left_right_array);
         return NULL;
     }
@@ -307,7 +310,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
 
 
 
-double get_spread(SPKDArray kd_arr, int dim){
+double getSpread(SPKDArray kd_arr, int dim){
 	int min_index, max_index;
 	double max_value, min_value;
     min_index = kd_arr->matrix[dim][0];
@@ -317,7 +320,7 @@ double get_spread(SPKDArray kd_arr, int dim){
     return (max_value - min_value);
 }
 
-double get_median(SPKDArray kd_arr, int dim){
+double getMedian(SPKDArray kd_arr, int dim){
 	int median_index = 0;
 	double median_value = 0;
     median_index = (kd_arr->num)/2;
@@ -325,14 +328,14 @@ double get_median(SPKDArray kd_arr, int dim){
     return median_value;
 }
 
-int get_dim(SPKDArray arr){
+int getDim(SPKDArray arr){
 	return arr->dim;
 }
 
-SPPoint* get_arr(SPKDArray kd_arr) {
+SPPoint* getArr(SPKDArray kd_arr) {
 	return kd_arr->arr;
 }
 
-int get_size(SPKDArray kd_arr) {
+int getSize(SPKDArray kd_arr) {
 	return kd_arr->num;
 }
