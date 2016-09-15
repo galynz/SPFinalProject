@@ -322,7 +322,7 @@ double getMedian(SPKDArray kd_arr, int dim){
 	int median_index = 0;
 	double median_value = 0;
     median_index = (kd_arr->num)/2;
-	median_value = spPointGetAxisCoor(kd_arr->arr[median_index-1], dim);
+	median_value = spPointGetAxisCoor(kd_arr->arr[median_index-1], dim); //Return the value in median-1 (because that's how the split function does it)
     return median_value;
 }
 
