@@ -3,6 +3,8 @@
 
 #include "SPPoint.h"
 
+#include <stdbool.h>
+
 /**
 * Reads an array of features from the file at featsPath. The number of features
 * extracted will be stored in the pointer given by numOfFeats.
