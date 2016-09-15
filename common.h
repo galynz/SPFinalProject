@@ -7,4 +7,6 @@ typedef enum {
     INCREMENTAL
 } KDTREE_SPLIT_METHOD;
 
+#define MAX_FILE_PATH (1024 + 1) /* 1024 chars + 1 null terminator */
+
 #endif /* COMMON_H_ */
