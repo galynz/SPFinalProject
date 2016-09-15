@@ -103,7 +103,6 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 
 	//Creating sub kd array
 	sub_kd_array = createKdArray(sub_arr, sub_size, dim);
-	//free(sub_arr);
 	if (sub_kd_array == NULL) {
 		return NULL;
 	}
@@ -323,7 +322,7 @@ double getMedian(SPKDArray kd_arr, int dim){
 	int median_index = 0;
 	double median_value = 0;
     median_index = (kd_arr->num)/2;
-	median_value = spPointGetAxisCoor(kd_arr->arr[median_index], dim);
+	median_value = spPointGetAxisCoor(kd_arr->arr[median_index-1], dim);
     return median_value;
 }
 
