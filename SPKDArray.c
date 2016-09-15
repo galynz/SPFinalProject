@@ -204,7 +204,7 @@ SPKDArray initArray(SPPoint* arr, int size){
     
     //Making sure all the points have the same dim 
     for (i=0; i<size; i++){
-        if ( spPointGetDimension(arr[0]) != dim ){
+        if ( spPointGetDimension(arr[i]) != dim ){
             return NULL;
         }
     }
