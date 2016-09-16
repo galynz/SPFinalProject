@@ -3,7 +3,7 @@
 
 #include "SPBPriorityQueue.h"
 
-typedef enum { MAX_SPREAD, RANDOM, INCREMENTAL } SplitMethod;
+typedef enum { MAX_SPREAD1, RANDOM1, INCREMENTAL1 } SplitMethod;
 
 typedef struct sp_kd_tree *SPKDTree;
 

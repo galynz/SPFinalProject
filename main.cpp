@@ -1,10 +1,13 @@
-#include "SPConfig.h"
 #include "SPImageProc.h"
+
+extern "C" {
+#include "SPConfig.h"
 #include "SPKDTree.h"
 #include "SPBPriorityQueue.h"
 #include "common.h"
 #include "FeaturesStorage.h"
 #include "SPLogger.h"
+}
 
 #include <assert.h>
 #include <stdio.h>
@@ -24,12 +27,11 @@ int compare(const void * a, const void * b)
 	return (*(int*)b - *(int*)a);
 }
 
-int preprocess(SPConfig config, size_t numOfImages, bool isExtractionMode, int maxNumOfFeatures, sp::ImageProc & imageProc, int * featureCount, SPPoint ** features) {
+int preprocess(SPConfig config, int numOfImages, bool isExtractionMode, int maxNumOfFeatures, sp::ImageProc & imageProc, int * featureCount, SPPoint ** features) {
 	int i = 0;
 	SPPoint * cur_image_features = NULL;
 	int cur_image_num_of_feats = 0;
 	char path[MAX_FILE_PATH]; /* buffer to store file paths */
-	bool extractionSuccess = false;
 	int ret_val = RETURN_FAILURE;
 
 	assert(featureCount && features);
@@ -84,7 +86,7 @@ cleanup:
  	return ret_val;
 }
 
-int doQuery(SPConfig config, sp::ImageProc & imageProc, size_t numOfImages, bool isMinimalGui, int numOfSimilarImages, SPKDTree tree, SPBPQueue queue, bool * shouldExit) {
+int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool isMinimalGui, int numOfSimilarImages, SPKDTree tree, SPBPQueue queue, bool * shouldExit) {
 	char query_image[MAX_FILE_PATH];
 	SPPoint * cur_image_features = NULL;
 	int cur_image_num_of_feats = 0;
@@ -97,7 +99,7 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, size_t numOfImages, bool
 	*shouldExit = false;
 
 	printf("Please enter an image path:\n");
-	gets(query_image);
+	fgets(query_image, sizeof(query_image), stdin);
 	if (strcmp("<>", query_image) == 0) {
 		*shouldExit = true;
 		return true;
@@ -163,6 +165,7 @@ int main(int argc, char * argv[]) {
 	SPKDTree tree = NULL;
 	SPBPQueue queue = NULL;
 	int ret_val = RETURN_FAILURE;
+	sp::ImageProc * imageProc = NULL;
 	
 	if (argc != 1) { /* if there are any arguments */
 		if (argc != 3 || strcmp(argv[1], "-c") != 0) {  /* if unexpected arguments */
@@ -175,7 +178,7 @@ int main(int argc, char * argv[]) {
 	/* load the config */
 	config = spConfigCreate(config_filename, &res_msg);
 	if (res_msg == SP_CONFIG_CANNOT_OPEN_FILE) {
-		printf("The %sconfiguration file %s couldn’t be open\n", (config_filename == DEFAULT_CONFIG ? "default " : ""), config_filename);
+		printf("The %sconfiguration file %s couldn’t be open\n", ((char*)config_filename == (char*)DEFAULT_CONFIG ? "default " : ""), config_filename);
 	}
 	if (res_msg != SP_CONFIG_SUCCESS) return RETURN_FAILURE;
 
@@ -187,18 +190,19 @@ int main(int argc, char * argv[]) {
 	}
 	logger_initilized = true;
 
-	sp::ImageProc imageProc(config); /* C++ - so it's ok to define vars not at the beginning */
+	imageProc = new sp::ImageProc(config); /* C++ - so it's ok to define vars not at the beginning */
 	
 	numOfImages = spConfigGetNumOfImages(config, &res_msg);
 	isMinimalGui = spConfigMinimalGui(config, &res_msg);
 	numOfSimilarImages = spConfigGetNumOfSimilarImages(config, &res_msg);
 
 	/* Preprocess - Load all features */
-	if (RETURN_SUCCESS != preprocess(config, numOfImages, spConfigIsExtractionMode(config, &res_msg), spConfigGetNumOfFeatures(config, &res_msg), imageProc, &numOfFeatures, &features)) {
+	if (RETURN_SUCCESS != preprocess(config, numOfImages, spConfigIsExtractionMode(config, &res_msg), spConfigGetNumOfFeatures(config, &res_msg), *imageProc, &numOfFeatures, &features)) {
 		goto cleanup;
 	}
 	
-	tree = initTree(features, numOfFeatures, spConfigGetKDTreeSplitMethod(config, &res_msg));
+	/* TODO remove the cast!! */
+	tree = initTree(features, numOfFeatures, (SplitMethod)spConfigGetKDTreeSplitMethod(config, &res_msg));
 	/* TODO validate tree */
 
 	queue = spBPQueueCreate(spConfigGetKNN(config, &res_msg));
@@ -206,7 +210,7 @@ int main(int argc, char * argv[]) {
 
 	/* main loop - ask for query images from user, and display results */
 	while (!shouldExit) {
-		if (RETURN_SUCCESS != doQuery(config, imageProc, numOfImages, isMinimalGui, numOfSimilarImages, tree, queue, &shouldExit)) {
+		if (RETURN_SUCCESS != doQuery(config, *imageProc, numOfImages, isMinimalGui, numOfSimilarImages, tree, queue, &shouldExit)) {
 			goto cleanup;
 		}
 	}
@@ -218,6 +222,7 @@ cleanup:
 	if (queue) spBPQueueDestroy(queue);
 	if (tree) destroyTree(tree);
 	if (features) free(features);
+	if (imageProc) delete imageProc;
 	if (logger_initilized) spLoggerDestroy();
 	spConfigDestroy(config);
 

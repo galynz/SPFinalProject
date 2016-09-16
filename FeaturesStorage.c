@@ -1,6 +1,7 @@
 #include "FeaturesStorage.h"
 
 #include <stdio.h>
+#include <assert.h>
 
 SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 	FILE * file = NULL;
