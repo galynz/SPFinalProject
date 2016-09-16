@@ -83,7 +83,7 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 		sub_pos = 0, j = 0, point_index = 0;
 	SPKDArray sub_kd_array = NULL;
 	SPPoint* sub_arr = NULL;
-	int* coor_sorting_arr = NULL;
+	int* coor_sorting_arr = NULL, *map_index_arr = NULL;
 
 	all_size = kd_arr->num;
 	dim = kd_arr->dim;
@@ -94,16 +94,26 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 	if (sub_arr == NULL) {
 		return NULL;
 	}
+    map_index_arr = (int*)malloc(all_size * sizeof(int));
+    if (map_index_arr == NULL){
+        free(sub_arr);
+        return NULL;
+    }
 	for (i = 0; i<all_size; i++) {
 		if (index_arr[i] == true) {
 			sub_arr[sub_pos] = kd_arr->arr[i];
+            map_index_arr[i] = sub_pos;
 			sub_pos++;
-		}
+		} else {
+            map_index_arr[i] = NOT_IN_SUB_INDEX;
+        }
 	}
 
 	//Creating sub kd array
 	sub_kd_array = createKdArray(sub_arr, sub_size, dim);
 	if (sub_kd_array == NULL) {
+        free(sub_arr);
+        free(map_index_arr);
 		return NULL;
 	}
 
@@ -112,18 +122,23 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 	according to their order in each coordiante,
 	without coordiantes of points that aren't in the sub array
 	*/
+    /*
 	coor_sorting_arr = (int*)malloc(all_size * sizeof(int));
 	if (coor_sorting_arr == NULL) {
+        free(map_index_arr);
+        free(sub_arr);
 		destroyKdArray(sub_kd_array, 0);
 		return NULL;
 	}
+    */
+    /*
 	for (i = 0; i<dim; i++) {
 		//Store the indexes of the points according to their i-th dim order
 		for (j = 0; j<all_size; j++) {
 			old_index = kd_arr->matrix[i][j];
 			if (index_arr[j] == true) {
 				//If the point is in the sub array, put it's index in her old position in the coor array
-				coor_sorting_arr[old_index] = j;
+				coor_sorting_arr[old_index] = map_index_arr[j];
 			}
 			else {
 				//Mark that the point isn't in the sub array
@@ -147,9 +162,29 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 			}
 		}
 	}
+    */
+    
+    for (i=0; i<dim; i++){
+        //Allocating the i-th row in sub matrix
+		sub_kd_array->matrix[i] = (int*)malloc(sub_size * sizeof(int));
+		if (sub_kd_array->matrix[i] == NULL) {
+			destroyKdArray(sub_kd_array, i);
+			free(coor_sorting_arr);
+			return NULL;
+		}
+		//Re-index the i-th row of the matrix
+        sub_pos = 0;
+        for (j = 0; j < all_size; j++){
+            old_index = kd_arr->matrix[i][j];
+            if (map_index_arr[old_index] != NOT_IN_SUB_INDEX){
+                sub_kd_array->matrix[i][sub_pos] = map_index_arr[old_index];
+                sub_pos++;
+            }
+        }
+    }
 
 	//Return the sub kd array
-	free(coor_sorting_arr);
+	free(map_index_arr);
 	return sub_kd_array;
 }
 
@@ -304,7 +339,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     }
 
     left_right_array[right] = createKdArraySubArray(kd_arr, right_indexes, right_size);
-    if (left_right_array[left] == NULL){
+    if (left_right_array[right] == NULL){
         free(left_indexes);
         free(right_indexes);
         destroyKdArray(left_right_array[left], left_right_array[left]->dim);
