@@ -10,6 +10,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 	int file_size = 0;
 	char * all_data = NULL;
 	char * data_end = NULL;
+	char * cur_place = NULL;
 	int i = 0;
 	bool success = true;
 
@@ -29,7 +30,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 		goto cleanup;
 	}
 
-	if (fread(numOfFeats, sizeof(int), 1, file) != sizeof(int)) {
+	if (fread(numOfFeats, sizeof(int), 1, file) != 1) {
 		/* TODO log */
 		goto cleanup;
 	}
@@ -51,9 +52,10 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 		goto cleanup;
 	}
 
+	cur_place = all_data;
 	data_end = all_data + file_size;
-	while (all_data != data_end) {
-		features[i++] = spPointDeserialize(all_data, &all_data);
+	while (cur_place != data_end) {
+		features[i++] = spPointDeserialize(cur_place, &cur_place);
 		if (!features[i]) {
 			/* TODO log */
 			while (i--) {
@@ -89,7 +91,7 @@ bool writeImageFeatures(const char* featsPath, int numOfFeats, SPPoint* features
 		return false;
 	}
 
-	if (fwrite(&numOfFeats, sizeof(int), 1, file) != sizeof(int)) {
+	if (fwrite(&numOfFeats, sizeof(int), 1, file) != 1) {
 		/* TODO log */
 		fclose(file);
 		return false;

@@ -1,4 +1,12 @@
+/*TODO remove*/
+#if defined ( WIN32 )
+#include "SPImageProc2.h"
+#else
+
 #include "SPImageProc.h"
+
+/*TODO remove*/
+#endif
 
 extern "C" {
 #include "SPConfig.h"
@@ -20,29 +28,36 @@ extern "C" {
 /* helper macro */
 #define VALIDATE_SUCCESS_OR_RETURN(msg) if (msg != SP_CONFIG_SUCCESS) return MAIN_RETURN_FAILURE;
 
+struct image_query_status {
+	int index; /* image index */
+	int count; /* number of time it has a close feature */
+};
+
 /* internal function - return positive val if b > a,
    negative if b < a, 0 if a == b */
 int compare(const void * a, const void * b)
 {
-	return (*(int*)b - *(int*)a);
+	return (((struct image_query_status*)b)->count - ((struct image_query_status*)a)->count);
 }
 
-int preprocess(SPConfig config, int numOfImages, bool isExtractionMode, int maxNumOfFeatures, sp::ImageProc & imageProc, int * featureCount, SPPoint ** features) {
-	int i = 0;
-	SPPoint * cur_image_features = NULL;
-	int cur_image_num_of_feats = 0;
+int preprocess(SPConfig config, int numOfImages, bool isExtractionMode, sp::ImageProc & imageProc, int * featureCount, SPPoint ** features) {
+	int i = 0, j = 0;
 	char path[MAX_FILE_PATH]; /* buffer to store file paths */
 	int ret_val = RETURN_FAILURE;
+	SPPoint ** temp_features_arrays = NULL;
+	int * features_count = NULL;
+	int total_feautre_count = 0;
 
 	assert(featureCount && features);
 
 	*featureCount = 0;
 	*features = NULL;
 
-	*features = (SPPoint *)malloc(sizeof(SPPoint) * numOfImages * maxNumOfFeatures);
-	if (!(*features)) {
-		goto cleanup;
-	}
+	temp_features_arrays = (SPPoint **)malloc(sizeof(SPPoint*) * numOfImages);
+	if (!temp_features_arrays) goto cleanup;
+	memset(temp_features_arrays, 0, sizeof(SPPoint*) * numOfImages);
+	features_count = (int *)malloc(sizeof(int) * numOfImages);
+	if (!features_count) goto cleanup;
 
 	/* get the features from image files */
 
@@ -51,34 +66,46 @@ int preprocess(SPConfig config, int numOfImages, bool isExtractionMode, int maxN
 		if (isExtractionMode) {
 			/* Get image path from the index, and get the features */
 			if (spConfigGetImagePath(path, config, i) != SP_CONFIG_SUCCESS ||
-				(cur_image_features = imageProc.getImageFeatures(path, i, &cur_image_num_of_feats)) == NULL) {
+				(temp_features_arrays[i] = imageProc.getImageFeatures(path, i, features_count + i)) == NULL) {
 				goto cleanup;
 			}
-			if (!writeImageFeatures(path, cur_image_num_of_feats, cur_image_features)) {
-				free(cur_image_features);
+			if (spConfigGetFeatsPath(path, config, i) != SP_CONFIG_SUCCESS || !writeImageFeatures(path, features_count[i], temp_features_arrays[i])) {
 				goto cleanup;
 			}
 		}
 		else {
 			/* None extraction mode - Get feats file path from the index, and read the features */
 			if (spConfigGetFeatsPath(path, config, i) != SP_CONFIG_SUCCESS ||
-				(cur_image_features = readImageFeatures(path, &cur_image_num_of_feats)) == NULL) {
+				(temp_features_arrays[i] = readImageFeatures(path, features_count + i)) == NULL) {
 				/* fail TODO Log */
 				goto cleanup;
 			}
 		}
 
-		/* copy all features to the features array */
-		while (cur_image_num_of_feats) {
-			(*features)[(*featureCount)++] = cur_image_features[--cur_image_num_of_feats];
-		}
+		total_feautre_count += features_count[i];
+	}
 
-		free(cur_image_features);
+	
+	*features = (SPPoint *)malloc(sizeof(SPPoint) * total_feautre_count);
+	if (!(*features)) {
+		goto cleanup;
+	}
+
+	for (i = 0; i < numOfImages; i++) {
+		for (j = 0; j < features_count[i]; j++) {
+			(*features)[(*featureCount)++] = temp_features_arrays[i][j];
+		}
 	}
 
 	ret_val = RETURN_SUCCESS;
 
 cleanup:
+	if (temp_features_arrays) {
+		for (i = 0; i < numOfImages; i++) {
+			if (temp_features_arrays[i]) free(temp_features_arrays[i]);
+		}
+		free(temp_features_arrays);
+	}
 	if (ret_val != RETURN_SUCCESS && *features) {
 		free(*features);
 		*features = NULL;
@@ -86,6 +113,15 @@ cleanup:
  	return ret_val;
 }
 
+/*TODO remove*/
+struct sp_point_t_2{
+	double* data;
+	int dim;
+	int index;
+};
+
+
+/*TODO remove first two params*/
 int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool isMinimalGui, int numOfSimilarImages, SPKDTree tree, SPBPQueue queue, bool * shouldExit) {
 	char query_image[MAX_FILE_PATH];
 	SPPoint * cur_image_features = NULL;
@@ -93,6 +129,7 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool is
 	int i = 0;
 	unsigned int image_index = 0;
 	char path[MAX_FILE_PATH];
+	int path_len = 0;
 
 	assert(config && tree && queue && shouldExit);
 	
@@ -100,6 +137,10 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool is
 
 	printf("Please enter an image path:\n");
 	fgets(query_image, sizeof(query_image), stdin);
+	path_len = strlen(query_image);
+	if (query_image[path_len - 1] == '\n') {
+		query_image[path_len - 1] = '\0';
+	}
 	if (strcmp("<>", query_image) == 0) {
 		*shouldExit = true;
 		return true;
@@ -110,14 +151,17 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool is
 	/*TODO check return*/
 	/* non existing file = exception ?? */
 
+	struct image_query_status * imagesCloseFeaturesCount = (struct image_query_status *)malloc(numOfImages * sizeof(struct image_query_status));
+	/* TODO check */
+	for (i = 0; i < numOfImages; i++) {
+		imagesCloseFeaturesCount[i].index = i;
+		imagesCloseFeaturesCount[i].count = 0;
+	}
+
 	for (i = 0; i < cur_image_num_of_feats; i++) {
 
 		kNearestNeighbors(tree, queue, cur_image_features[i]);
 		/* TODO check return */
-
-		int * imagesCloseFeaturesCount = (int *)malloc(numOfImages * sizeof(int));
-		/* TODO check */
-		memset(imagesCloseFeaturesCount, 0, numOfImages * sizeof(int));
 
 		while (!spBPQueueIsEmpty(queue)) {
 			SPListElement cur_feat_elem = spBPQueuePeek(queue);
@@ -125,29 +169,31 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool is
 			/* TODO check */
 
 			image_index = spListElementGetIndex(cur_feat_elem);
-			imagesCloseFeaturesCount[image_index]++;
+			imagesCloseFeaturesCount[image_index].count++;
 
 			spListElementDestroy(cur_feat_elem);
 		}
+	}
+	
+	/* sort imagesCloseFeaturesCount array in descending order */
+	qsort(imagesCloseFeaturesCount, numOfImages, sizeof(image_query_status), compare);
 
-		/* sort imagesCloseFeaturesCount array in descending order */
-		qsort(imagesCloseFeaturesCount, numOfImages, sizeof(int), compare);
+	if (!isMinimalGui) {
+		printf("Best candidates for - %s - are:\n", query_image);
+	}
 
-		if (!isMinimalGui) {
-			printf("Best candidates for - %s - are:\n", query_image);
+	for (i = 0; i < numOfSimilarImages && i < numOfImages; i++) {
+		spConfigGetImagePath(path, config, imagesCloseFeaturesCount[i].index);
+		/*TODO check return */
+		if (isMinimalGui) {
+			imageProc.showImage(path);
 		}
-
-		for (i = 0; i < numOfSimilarImages && i < numOfImages; i++) {
-			spConfigGetImagePath(path, config, i);
-			/*TODO check return */
-			if (isMinimalGui) {
-				imageProc.showImage(path);
-			}
-			else {
-				printf("%s\n", path);
-			}
+		else {
+			printf("%s\n", path);
 		}
 	}
+	
+	/* TODO free imagesCloseFeaturesCount */
 
 	free(cur_image_features);
 
@@ -178,7 +224,7 @@ int main(int argc, char * argv[]) {
 	/* load the config */
 	config = spConfigCreate(config_filename, &res_msg);
 	if (res_msg == SP_CONFIG_CANNOT_OPEN_FILE) {
-		printf("The %sconfiguration file %s couldn’t be open\n", ((char*)config_filename == (char*)DEFAULT_CONFIG ? "default " : ""), config_filename);
+		printf("The %sconfiguration file %s couldn't be open\n", ((char*)config_filename == (char*)DEFAULT_CONFIG ? "default " : ""), config_filename);
 	}
 	if (res_msg != SP_CONFIG_SUCCESS) return RETURN_FAILURE;
 
@@ -190,14 +236,14 @@ int main(int argc, char * argv[]) {
 	}
 	logger_initilized = true;
 
-	imageProc = new sp::ImageProc(config); /* C++ - so it's ok to define vars not at the beginning */
+	imageProc = new sp::ImageProc(config);
 	
 	numOfImages = spConfigGetNumOfImages(config, &res_msg);
 	isMinimalGui = spConfigMinimalGui(config, &res_msg);
 	numOfSimilarImages = spConfigGetNumOfSimilarImages(config, &res_msg);
 
 	/* Preprocess - Load all features */
-	if (RETURN_SUCCESS != preprocess(config, numOfImages, spConfigIsExtractionMode(config, &res_msg), spConfigGetNumOfFeatures(config, &res_msg), *imageProc, &numOfFeatures, &features)) {
+	if (RETURN_SUCCESS != preprocess(config, numOfImages, spConfigIsExtractionMode(config, &res_msg), *imageProc, &numOfFeatures, &features)) {
 		goto cleanup;
 	}
 	

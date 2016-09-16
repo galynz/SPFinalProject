@@ -181,7 +181,7 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
             return false;
         }
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
-        if (enqueue_msg != SP_BPQUEUE_SUCCESS){
+		if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL){
             return false;
         }
         return true;
