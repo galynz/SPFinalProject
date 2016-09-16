@@ -139,38 +139,38 @@ bool isLeaf(SPKDTree node){
  A helper function that searches one of the tree's sides (or both)
  */
 
-status searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint p, double curr_dim_distance_squared){
-    status ret_status = SUCCESS;
+bool searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint p, double curr_dim_distance_squared){
+    bool ret_status = true;
     double queue_peek_last = 0;
     //Searching the sub tree
     ret_status = kNearestNeighbors(search_sub, bpq, p);
-    if ( ret_status == FAILURE ){  
-        return FAILURE;
+    if ( ret_status == false ){  
+        return false;
     }
     queue_peek_last = spListElementGetValue(spBPQueuePeekLast(bpq));
     if ( queue_peek_last == INVALID ){
-        return FAILURE;
+        return false;
     }
     if (spBPQueueIsFull(bpq) == false || 
         queue_peek_last > curr_dim_distance_squared){
         //Searching the other sub tree as well
         ret_status = kNearestNeighbors(other, bpq, p);
-        if (ret_status == FAILURE ){
-            return FAILURE;
+        if (ret_status == false ){
+            return false;
         }
     }
-    return SUCCESS;
+    return true;
 }
 
-status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
+bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
     SPListElement curr_elem = NULL;
     SP_BPQUEUE_MSG enqueue_msg;
     double curr_dim_distance = 0, curr_dim_distance_squared = 0;
-    status ret_status;
+    bool ret_status;
     
     if (curr == NULL){
-        return FAILURE;
+        return false;
     }
     
     //If curr is a leaf, trying to add it to the sp
@@ -178,13 +178,13 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         curr_elem = spListElementCreate(spPointGetIndex(curr->data),
                         spPointL2SquaredDistance(p, curr->data));
         if (curr_elem == NULL){
-            return FAILURE;
+            return false;
         }
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
         if (enqueue_msg != SP_BPQUEUE_SUCCESS){
-            return FAILURE;
+            return false;
         }
-        return SUCCESS;
+        return true;
     }
     
     //Calculating the distance between curr and the point (in current dim)
@@ -201,9 +201,9 @@ status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     }
     
     if (ret_status == FAILURE){
-        return FAILURE;
+        return false;
     }
-    return SUCCESS;
+    return true;
 }
 
 void destroyTree(SPKDTree tree){
