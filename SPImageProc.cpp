@@ -12,6 +12,11 @@ extern "C" {
 #include "SPLogger.h"
 }
 
+#if defined ( WIN32 )
+#define __func__ __FUNCTION__
+#endif
+
+
 using namespace cv;
 using namespace std;
 

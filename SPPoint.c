@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 
 struct sp_point_t{
    double* data;
@@ -104,16 +105,16 @@ int spPointSerialize(SPPoint p, char ** data) {
 }
 
 SPPoint spPointDeserialize(char * data, char ** end_of_data) {
-    int * int_read_ptr = data;
+    int * int_read_ptr = (int *)data;
     int dim = 0, index = 0;
     char * point_data = NULL;
     assert(data != NULL && end_of_data != NULL);
     
     dim = *(int_read_ptr++);
     index = *(int_read_ptr++);
-    point_data = int_read_ptr;
+    point_data = (char *)int_read_ptr;
     
-    *end_of_data = data + dim*sizeof(double);
+	*end_of_data = point_data + dim*sizeof(double);
     
-    return spPointCreate(data, dim, index);
+	return spPointCreate((double *)point_data, dim, index);
 }
