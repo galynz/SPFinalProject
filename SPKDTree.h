@@ -3,11 +3,7 @@
 
 #include "SPBPriorityQueue.h"
 
-typedef enum { MAX_SPREAD1, RANDOM1, INCREMENTAL1 } SplitMethod;
-
 typedef struct sp_kd_tree *SPKDTree;
-
-typedef enum {SUCCESS, FAILURE} status;
 
 /**
  * Creates a new kd-tree struct by creating a kd-array
@@ -30,9 +26,10 @@ SPKDTree initTree(SPPoint* arr, int size, SplitMethod split_method);
  * @param curr - a SPKDTree to start the search from.
  * @param bpq - a SPBPQueue to store the neighbors in.
  * @param p - a SPPoint to search.
+ * @return true(if the function ran ok)/false(if the function didn't run ok);
  */
 
-status kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p);
+bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p);
 
 /**
  * A recursive function that frees all the memory allocated when the tree was created.
