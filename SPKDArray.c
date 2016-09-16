@@ -263,7 +263,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     
     //Filling the indexes' arrays
     for (i=0; i<size; i++){
-        if (kd_arr->matrix[coor][i] < median){
+        if (kd_arr->matrix[coor][i] <= median){
             left_indexes[i] = true;
             right_indexes[i] = false;
         } else {
@@ -322,7 +322,7 @@ double getMedian(SPKDArray kd_arr, int dim){
 	int median_index = 0;
 	double median_value = 0;
     median_index = (kd_arr->num)/2;
-	median_value = spPointGetAxisCoor(kd_arr->arr[median_index-1], dim); //Return the value in median-1 (because that's how the split function does it)
+	median_value = spPointGetAxisCoor(kd_arr->arr[median_index], dim);
     return median_value;
 }
 
