@@ -42,7 +42,7 @@ int getMaxSpreadDim(SPKDArray kd_arr, int dim) {
 	return max_dim;
 }
 
-SPKDTree initTreeRec(SPPoint* arr, int size, SplitMethod split_method, int prev_dim, SPKDArray kd_arr){
+SPKDTree initTreeRec(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method, int prev_dim, SPKDArray kd_arr){
 	SPKDArray* splitted_kd_arr = NULL;
     SPKDTree tree = NULL;
 	int dim = 0, split_dim = 0;
@@ -97,7 +97,7 @@ SPKDTree initTreeRec(SPPoint* arr, int size, SplitMethod split_method, int prev_
     return tree;
 }
 
-SPKDTree initTree(SPPoint* arr, int size, SplitMethod split_method) {
+SPKDTree initTree(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method) {
 	SPKDArray kd_arr = NULL;
 	SPKDTree tree = NULL;
 	int dim = 0;
@@ -200,7 +200,7 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         ret_status = searchSubTree(curr->right, curr->left, bpq, p, curr_dim_distance_squared);
     }
     
-    if (ret_status == FAILURE){
+    if (ret_status == false){
         return false;
     }
     return true;

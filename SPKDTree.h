@@ -2,6 +2,7 @@
 #define SPKDTREE_H_
 
 #include "SPBPriorityQueue.h"
+#include "common.h"
 
 typedef struct sp_kd_tree *SPKDTree;
 
@@ -12,13 +13,13 @@ typedef struct sp_kd_tree *SPKDTree;
  * 
  * @param arr - an array of SPPoints, all with the same number of coordinates.
  * @param size - the number of SPPoints in arr.
- * @param split_method - SplitMethod (max_spread/random/incremental)
+ * @param split_method - KDTREE_SPLIT_METHOD (max_spread/random/incremental)
  * @return NULL if size <= 0 or dim <= 0
  * or not all the points have the same dim
  * or memory allocation failed. Otherwise return SPKDTree.
  */
 
-SPKDTree initTree(SPPoint* arr, int size, SplitMethod split_method);
+SPKDTree initTree(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method);
 
 /**
  *  A recursive function that enqueues the nearest neighbors of p to bpq.
