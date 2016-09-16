@@ -81,3 +81,39 @@ double spPointL2SquaredDistance(SPPoint p, SPPoint q){
     return distance;
 }
     
+int spPointSerialize(SPPoint p, char ** data) {
+    int needed_size = 0;
+    int * int_write_ptr = NULL;
+    assert(p != NULL && data != NULL);
+    
+    /* We need space for the dim & index, and for the data */
+    needed_size = 2 * sizeof(int) + p->dim*sizeof(double);
+    
+    *data = (char *)malloc(needed_size);
+    if (!*data) {
+        return -1; /* allocation error */
+    }
+    
+    int_write_ptr = (int *)*data;
+    
+    *(int_write_ptr++) = p->dim;
+    *(int_write_ptr++) = p->index;
+    memcpy(int_write_ptr, p->data, p->dim*sizeof(double));
+    
+    return needed_size;
+}
+
+SPPoint spPointDeserialize(char * data, char ** end_of_data) {
+    int * int_read_ptr = data;
+    int dim = 0, index = 0;
+    char * point_data = NULL;
+    assert(data != NULL && end_of_data != NULL);
+    
+    dim = *(int_read_ptr++);
+    index = *(int_read_ptr++);
+    point_data = int_read_ptr;
+    
+    *end_of_data = data + dim*sizeof(double);
+    
+    return spPointCreate(data, dim, index);
+}

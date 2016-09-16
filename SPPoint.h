@@ -106,5 +106,24 @@ double spPointGetAxisCoor(SPPoint point, int axis);
  */
 double spPointL2SquaredDistance(SPPoint p, SPPoint q);
 
+/**
+ * Encodes a point into a bytes buffer.
+ *
+ * @param p - The point
+ * @param data - a pointer to a pointer that will hold allocated data
+ * @return
+ * -1 on failure, size of the buffer on success
+ */
+int spPointSerialize(SPPoint p, char ** data);
+
+/**
+ * Decodes a point from a bytes buffer.
+ *
+ * @param data - a pointer to the buffer
+ * @param end_of_data - a pointer to a pointer that will hold end of point data
+ * @return
+ * a newly created point based on the data read, or null in case of error
+ */
+SPPoint spPointDeserialize(char * data, char ** end_of_data);
 
 #endif /* SPPOINT_H_ */

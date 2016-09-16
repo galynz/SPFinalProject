@@ -205,7 +205,7 @@ SP_CONFIG_MSG spConfigGetImagePath(char* imagePath, const SPConfig config,
 * - SP_CONFIG_SUCCESS - in case of success
 */
 SP_CONFIG_MSG spConfigGetFeatsPath(char* featsPath, const SPConfig config,
-	int index)
+	int index);
 
 /**
  * The function stores in pcaPath the full path of the pca file.
