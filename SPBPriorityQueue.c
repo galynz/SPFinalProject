@@ -13,7 +13,7 @@ struct sp_bp_queue_t {
 SPBPQueue spBPQueueCreate(int maxSize){
 	SPBPQueue queue = NULL;
     // Validating max size
-    if (maxSize < 0){
+    if (maxSize <= 0){
         return NULL;
     }
     // Allocating queue
