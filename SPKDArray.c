@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #define NOT_IN_SUB_INDEX -1
+#define ODD 1
 
 enum SIDE {left, right};
 
@@ -80,7 +81,7 @@ static SPKDArray createKdArray(SPPoint* arr, int size, int dim) {
 static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int sub_size) {
 	//Initilazing vars
 	int i = 0, all_size = 0, dim = 0, old_index = 0,
-		sub_pos = 0, j = 0;//, point_index = 0;
+		sub_pos = 0, j = 0;
 	SPKDArray sub_kd_array = NULL;
 	SPPoint* sub_arr = NULL;
 	int* coor_sorting_arr = NULL, *map_index_arr = NULL;
@@ -116,53 +117,6 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
         free(map_index_arr);
 		return NULL;
 	}
-
-	/*
-	Creating an array that will store each of the rows (of the matrix)
-	according to their order in each coordiante,
-	without coordiantes of points that aren't in the sub array
-	*/
-    /*
-	coor_sorting_arr = (int*)malloc(all_size * sizeof(int));
-	if (coor_sorting_arr == NULL) {
-        free(map_index_arr);
-        free(sub_arr);
-		destroyKdArray(sub_kd_array, 0);
-		return NULL;
-	}
-    */
-    /*
-	for (i = 0; i<dim; i++) {
-		//Store the indexes of the points according to their i-th dim order
-		for (j = 0; j<all_size; j++) {
-			old_index = kd_arr->matrix[i][j];
-			if (index_arr[j] == true) {
-				//If the point is in the sub array, put it's index in her old position in the coor array
-				coor_sorting_arr[old_index] = map_index_arr[j];
-			}
-			else {
-				//Mark that the point isn't in the sub array
-				coor_sorting_arr[old_index] = NOT_IN_SUB_INDEX;
-			}
-		}
-		//Allocating the i-th row in sub matrix
-		sub_kd_array->matrix[i] = (int*)malloc(sub_size * sizeof(int));
-		if (sub_kd_array->matrix[i] == NULL) {
-			destroyKdArray(sub_kd_array, i);
-			free(coor_sorting_arr);
-			return NULL;
-		}
-		//Re-index the i-th row of the matrix
-		sub_pos = 0;
-		for (j = 0; j<all_size; j++) {
-			point_index = coor_sorting_arr[j];
-			if (point_index != NOT_IN_SUB_INDEX) {
-				sub_kd_array->matrix[i][sub_pos] = point_index;
-				sub_pos++;
-			}
-		}
-	}
-    */
     
     for (i=0; i<dim; i++){
         //Allocating the i-th row in sub matrix
@@ -282,7 +236,10 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     //Calculating the median
     size = kd_arr->num;
     median = size/2;
-	left_size = median + 1;
+	if (size % 2 == ODD) {
+		median++;
+	}
+	left_size = median;
 	right_size = size - left_size;
     
     //Allocating indexes' arrays
@@ -296,22 +253,10 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
         return NULL;
     }
     
-    //Filling the indexes' arrays
-    /*
-    for (i=0; i<size; i++){
-        if (kd_arr->matrix[coor][i] <= median){ //If the array isn't of even size, left will be bigger (by 1)
-            left_indexes[i] = true;
-            right_indexes[i] = false;
-        } else {
-            right_indexes[i] = true;
-            left_indexes[i] = false;
-        }
-    }
-    */
-    
+    //Filling the indexes' arrays   
     for (i=0; i<size; i++){
         point_index = kd_arr->matrix[coor][i];
-        if (i<=median){
+        if (i<median){
             left_indexes[point_index] = true;
             right_indexes[point_index] = false;
         } else {
@@ -369,7 +314,10 @@ double getSpread(SPKDArray kd_arr, int dim){
 double getMedian(SPKDArray kd_arr, int dim){
 	int median_index = 0;
 	double median_value = 0;
-    median_index = (kd_arr->num)/2;
+	median_index = kd_arr->num / 2;
+	if (kd_arr->num % 2 == ODD) {
+		median_index++;
+	}
 	median_value = spPointGetAxisCoor(kd_arr->arr[median_index], dim);
     return median_value;
 }
