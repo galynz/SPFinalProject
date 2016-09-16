@@ -71,7 +71,7 @@ SPKDTree initTreeRec(SPPoint* arr, int size, SplitMethod split_method, int prev_
     } 
     else if (split_method == RANDOM ){
         //choosing a random dim
-        split_dim = rand()/(RAND_MAX/(dim+1));
+        split_dim = rand()/(RAND_MAX/dim);
     }
     else if (split_method == INCREMENTAL) {
         //incremeting the previous dim
