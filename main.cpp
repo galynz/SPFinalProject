@@ -202,7 +202,7 @@ int main(int argc, char * argv[]) {
 	}
 	
 	/* TODO remove the cast!! */
-	tree = initTree(features, numOfFeatures, (SplitMethod)spConfigGetKDTreeSplitMethod(config, &res_msg));
+	tree = initTree(features, numOfFeatures, spConfigGetKDTreeSplitMethod(config, &res_msg));
 	/* TODO validate tree */
 
 	queue = spBPQueueCreate(spConfigGetKNN(config, &res_msg));

@@ -2,11 +2,12 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <malloc.h>
 
 SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 	FILE * file = NULL;
 	SPPoint * features = NULL;
-	size_t file_size = 0;
+	int file_size = 0;
 	char * all_data = NULL;
 	char * data_end = NULL;
 	int i = 0;
@@ -35,7 +36,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 
 	file_size -= sizeof(*numOfFeats); /* from now on we only need to read the features */
 
-	all_data = (SPPoint *)malloc(file_size);
+	all_data = (char *)malloc(file_size);
 	if (!all_data) {
 		goto cleanup;
 	}
@@ -45,7 +46,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 		goto cleanup;
 	}
 
-	if (fread(all_data, 1, file_size, file) != file_size) {
+	if ((int)fread(all_data, 1, file_size, file) != file_size) {
 		/* TODO log */
 		goto cleanup;
 	}
@@ -102,7 +103,7 @@ bool writeImageFeatures(const char* featsPath, int numOfFeats, SPPoint* features
 			return false;
 		}
 
-		if (fwrite(point_data, 1, data_size, file) != data_size) {
+		if ((int)fwrite(point_data, 1, data_size, file) != data_size) {
 			/* TODO log */
 			fclose(file);
 			free(point_data);
