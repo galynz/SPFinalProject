@@ -180,7 +180,7 @@ static int* sortPointsDim(SPPoint* arr, int coor, int size) {
 
 	for (i = 0; i<size; i++) {
 		point_index = dim_coor[i].index;
-		index_arr[point_index] = i;
+		index_arr[i] = point_index;
 	}
 
 	//Free all allocations
@@ -240,14 +240,14 @@ void destroyKdArray(SPKDArray kd_array, int dim){
 
 
 SPKDArray* split(SPKDArray kd_arr, int coor){
-	int median = 0, size = 0, i = 0, left_size = 0, right_size=0;
+	int median = 0, size = 0, i = 0, left_size = 0, right_size=0, point_index;
     SPKDArray * left_right_array = NULL;
     bool *left_indexes = NULL, *right_indexes = NULL;
     
     //Calculating the median
     size = kd_arr->num;
     median = size/2;
-	left_size = median;
+	left_size = median + 1;
 	right_size = size - left_size;
     
     //Allocating indexes' arrays
@@ -262,6 +262,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     }
     
     //Filling the indexes' arrays
+    /*
     for (i=0; i<size; i++){
         if (kd_arr->matrix[coor][i] <= median){ //If the array isn't of even size, left will be bigger (by 1)
             left_indexes[i] = true;
@@ -269,6 +270,18 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
         } else {
             right_indexes[i] = true;
             left_indexes[i] = false;
+        }
+    }
+    */
+    
+    for (i=0; i<size; i++){
+        point_index = kd_arr->matrix[coor][i];
+        if (i<=median){
+            left_indexes[point_index] = true;
+            right_indexes[point_index] = false;
+        } else {
+            left_indexes[point_index] = false;
+            right_indexes[point_index] = true;
         }
     }
     
