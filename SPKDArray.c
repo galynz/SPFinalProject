@@ -263,7 +263,7 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
     
     //Filling the indexes' arrays
     for (i=0; i<size; i++){
-        if (kd_arr->matrix[coor][i] <= median){
+        if (kd_arr->matrix[coor][i] <= median){ //If the array isn't of even size, left will be bigger (by 1)
             left_indexes[i] = true;
             right_indexes[i] = false;
         } else {
