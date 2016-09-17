@@ -1,12 +1,4 @@
-/*TODO remove*/
-#if defined ( WIN32 )
-#include "SPImageProc2.h"
-#else
-
 #include "SPImageProc.h"
-
-/*TODO remove*/
-#endif
 
 extern "C" {
 #include "SPConfig.h"
