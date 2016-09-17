@@ -33,6 +33,7 @@ static int compareKDArrayDimCoor(const void * a, const void * b) {
  */
 static SPKDArray createKdArray(SPPoint* arr, int size, int dim) {
 	SPKDArray kd_array = NULL;
+	int i = 0, j = 0;
 
 	//Allocating kd_array
 	kd_array = (SPKDArray)malloc(sizeof(*kd_array));
@@ -97,8 +98,8 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 
 	//Creating sub kd array
 	sub_kd_array = createKdArray(sub_arr, sub_size, dim);
+    free(sub_arr);
 	if (sub_kd_array == NULL) {
-        free(sub_arr);
         free(map_index_arr);
 		return NULL;
 	}
