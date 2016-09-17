@@ -149,7 +149,7 @@ bool searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint p
     if ( ret_status == false ){  
         return false;
     }
-    queue_peek_last = spListElementGetValue(spBPQueuePeekLast(bpq));
+    queue_peek_last = spBPQueueMaxValue(bpq);
     if ( queue_peek_last == INVALID ){
         return false;
     }
