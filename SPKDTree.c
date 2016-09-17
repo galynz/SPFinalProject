@@ -95,7 +95,6 @@ SPKDTree initTreeRec(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method, i
     //Destroying the kd-arrays created in the current iteration
     destroyKdArray(splitted_kd_arr[LEFT], dim);
     destroyKdArray(splitted_kd_arr[RIGHT], dim);
-    free(splitted_kd_arr);
     return tree;
 }
 
@@ -170,7 +169,7 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     SPListElement curr_elem = NULL;
     SP_BPQUEUE_MSG enqueue_msg;
     double curr_dim_distance = 0, curr_dim_distance_squared = 0;
-    bool ret_status = true;
+    bool ret_status;
     
     if (curr == NULL){
         return false;
@@ -183,11 +182,8 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         if (curr_elem == NULL){
             return false;
         }
-       
-        //Trying to insert the element to the queue
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
-        spListElementDestroy(curr_elem);
-        if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL){
+		if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL){
             return false;
         }
         return true;
@@ -209,6 +205,20 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     return ret_status;
 } 
 
+void newSearch(SPKDTree tree, SPPoint p, SPBPQueue bpq) {
+	if (tree == NULL) {
+		return;
+	}
+	if (isLeaf(tree)) {
+		SPListElement elem = spListElementCreate(spPointGetIndex(tree->data), spPointL2SquaredDistance(p, tree->data));
+		spBPQueueEnqueue(bpq, elem);
+	}
+	else {
+		newSearch(tree->left, p, bpq);
+		newSearch(tree->right, p, bpq);
+	}
+}
+
 
 
 void destroyTree(SPKDTree tree){
@@ -216,5 +226,6 @@ void destroyTree(SPKDTree tree){
     //Recursivly destroy left and right sub trees
     destroyTree(tree->left);
     destroyTree(tree->right);
+    spPointDestroy(tree->data);
     free(tree);
 }
