@@ -6,8 +6,10 @@ spImagesSuffix = .png
 spNumOfImages = 17
 #the following variables have default values, if not set the default value is choosen
 # spPCADimension = 20 -> notice the default value is chosen since this is a comment
-spNumOfFeatures = 3
+spNumOfFeatures = 100
 spExtractionMode = true
  #spMinimalGUI = true -> the default value is chosen since this is a comment
- spNumOfSimilarImages = 1
+ spNumOfSimilarImages = 5
 spLoggerFilename = stdout
+spKNN=5
+spKDTreeSplitMethod = RANDOM

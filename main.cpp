@@ -158,6 +158,8 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool is
 		imagesCloseFeaturesCount[i].count = 0;
 	}
 
+	/* TODO remove the file */
+	FILE *f = fopen("random.txt", "w");
 	for (i = 0; i < cur_image_num_of_feats; i++) {
 
 		kNearestNeighbors(tree, queue, cur_image_features[i]);
@@ -170,12 +172,17 @@ int doQuery(SPConfig config, sp::ImageProc & imageProc, int numOfImages, bool is
 
 			image_index = spListElementGetIndex(cur_feat_elem);
 			imagesCloseFeaturesCount[image_index].count++;
+			/*TODO: remove this print*/
+			fprintf(f, "%d-%f\n", image_index, spListElementGetValue(cur_feat_elem));
 
 			spListElementDestroy(cur_feat_elem);
 		}
 	}
+	/* TODO remove this line */
+	fclose(f);
 	
 	/* sort imagesCloseFeaturesCount array in descending order */
+
 	qsort(imagesCloseFeaturesCount, numOfImages, sizeof(image_query_status), compare);
 
 	if (!isMinimalGui) {

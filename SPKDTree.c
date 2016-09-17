@@ -205,6 +205,83 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     return ret_status;
 } 
 
+
+void newSearch(SPKDTree tree, SPPoint p, SPBPQueue bpq);
+
+/*
+bool kNearestNeighbors(SPKDTree curr, SPBPQueue bpq, SPPoint p) {
+	//Initinlaizing vars
+	SPListElement curr_elem = NULL;
+	SP_BPQUEUE_MSG enqueue_msg;
+	double curr_dim_distance = 0, curr_dim_distance_squared = 0;
+	bool ret_status;
+
+	if (curr == NULL) {
+		return false;
+	}
+
+	SPBPQueue bpq1 = spBPQueueCopy(bpq);//spBPQueueCreate(spBPQueueGetMaxSize(bpq));
+	SPBPQueue bpq2 = spBPQueueCopy(bpq);//spBPQueueCreate(spBPQueueGetMaxSize(bpq));
+
+	//If curr is a leaf, trying to add it to the queue
+	if (isLeaf(curr) == true) {
+		curr_elem = spListElementCreate(spPointGetIndex(curr->data),
+			spPointL2SquaredDistance(p, curr->data));
+		if (curr_elem == NULL) {
+			return false;
+		}
+		enqueue_msg = spBPQueueEnqueue(bpq1, curr_elem);
+		if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL) {
+			return false;
+		}
+		ret_status = true;
+		goto cleanup;
+	}
+
+	//Calculating the distance between curr and the point (in current dim)
+	curr_dim_distance = (curr->val - spPointGetAxisCoor(p, curr->dim));
+	curr_dim_distance_squared = (curr_dim_distance * curr_dim_distance);
+
+	//Decieding which sub tree to search
+	if (spPointGetAxisCoor(p, curr->dim) <= curr->val) {
+		//Searching the left sub tree
+		ret_status = searchSubTree(curr->left, curr->right, bpq1, p, curr_dim_distance_squared);
+	}
+	else {
+		//Searching the right sub tree
+		ret_status = searchSubTree(curr->right, curr->left, bpq1, p, curr_dim_distance_squared);
+	}
+
+	if (!ret_status) {
+		printf("problem");
+		return false;
+	}
+
+cleanup:
+	newSearch(curr, p, bpq2);
+
+	if (spBPQueueSize(bpq1) != spBPQueueSize(bpq2)) {
+		printf("big error");
+		return false;
+	}
+
+	spBPQueueClear(bpq);
+	while (!spBPQueueIsEmpty(bpq1)) {
+		SPListElement elem1, elem2;
+		elem1 = spBPQueuePeek(bpq1);
+		spBPQueueDequeue(bpq1);
+		elem2 = spBPQueuePeek(bpq2);
+		spBPQueueDequeue(bpq2);
+		if (spListElementGetValue(elem1) != spListElementGetValue(elem2)) {
+			printf("big error2");
+			return false;
+		}
+		spBPQueueEnqueue(bpq, elem1);
+	}
+
+	return ret_status;
+}
+
 void newSearch(SPKDTree tree, SPPoint p, SPBPQueue bpq) {
 	if (tree == NULL) {
 		return;
@@ -218,7 +295,7 @@ void newSearch(SPKDTree tree, SPPoint p, SPBPQueue bpq) {
 		newSearch(tree->right, p, bpq);
 	}
 }
-
+*/
 
 
 void destroyTree(SPKDTree tree){
