@@ -21,7 +21,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 	VALIDATE_WITH_LOG(file, "Could not open feature file");
 	
 	VALIDATE_WITH_LOG(0 == fseek(file, 0, SEEK_END) && -1 != (file_size = ftell(file))
-		&& 0 != fseek(file, 0, SEEK_SET), "Error getting file size");
+		&& 0 == fseek(file, 0, SEEK_SET), "Error getting file size");
 
 	VALIDATE_WITH_LOG(fread(numOfFeats, sizeof(int), 1, file) == 1, "Error reading num of features");
 
