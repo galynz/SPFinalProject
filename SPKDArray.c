@@ -61,20 +61,6 @@ static SPKDArray createKdArray(SPPoint* arr, int size, int dim) {
 		return NULL;
 	}
 
-	//Allocating each of the rows
-	for (i = 0; i<dim; i++) {
-		kd_array->matrix[i] = (int*)malloc(size * sizeof(int));
-		if (kd_array->matrix[i] == NULL) {
-			for (j = 0; j<i; j++) {
-				free(kd_array->matrix[j]);
-			}
-			free(kd_array->matrix);
-			free(kd_array->arr);
-			free(kd_array);
-			return NULL;
-		}
-	}
-
 	return kd_array;
 }
 
@@ -199,6 +185,9 @@ SPKDArray initArray(SPPoint* arr, int size){
     }
     //Creating the kd array
     kd_array = createKdArray(arr, size, dim);
+    if (kd_array == NULL){
+        return NULL;
+    }
     
     //Filling the matrix
     for (i=0; i<dim; i++){
