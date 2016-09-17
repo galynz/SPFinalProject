@@ -1,4 +1,5 @@
 #include "FeaturesStorage.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -12,52 +13,32 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 	char * data_end = NULL;
 	char * cur_place = NULL;
 	int i = 0;
-	bool success = true;
+	bool success = false;
 
 	assert(featsPath != NULL && numOfFeats != NULL);
 
 	file = fopen(featsPath, "rb");
-	if (!file) {
-		/* TODO log */
-		return NULL;
-	}
-
+	VALIDATE_WITH_LOG(file, "Could not open feature file");
 	
-	if (0 != fseek(file, 0, SEEK_END) ||
-		-1 == (file_size = ftell(file)) ||
-		0 != fseek(file, 0, SEEK_SET)) {
-		/*TODO log could not get file size*/
-		goto cleanup;
-	}
+	VALIDATE_WITH_LOG(0 == fseek(file, 0, SEEK_END) && -1 != (file_size = ftell(file))
+		&& 0 != fseek(file, 0, SEEK_SET), "Error getting file size");
 
-	if (fread(numOfFeats, sizeof(int), 1, file) != 1) {
-		/* TODO log */
-		goto cleanup;
-	}
+	VALIDATE_WITH_LOG(fread(numOfFeats, sizeof(int), 1, file) == 1, "Error reading num of features");
 
 	file_size -= sizeof(*numOfFeats); /* from now on we only need to read the features */
 
 	all_data = (char *)malloc(file_size);
-	if (!all_data) {
-		goto cleanup;
-	}
-
 	features = (SPPoint *)malloc((*numOfFeats) * sizeof(SPPoint));
-	if (!features) {
-		goto cleanup;
-	}
+	VALIDATE_WITH_LOG(all_data && features, "Allocation error");
 
-	if ((int)fread(all_data, 1, file_size, file) != file_size) {
-		/* TODO log */
-		goto cleanup;
-	}
+	VALIDATE_WITH_LOG((int)fread(all_data, 1, file_size, file) == file_size, "Error reading feature data");
 
 	cur_place = all_data;
 	data_end = all_data + file_size;
 	while (cur_place != data_end) {
 		features[i++] = spPointDeserialize(cur_place, &cur_place);
 		if (!features[i]) {
-			/* TODO log */
+			LOG_ERROR("Error deserializing some point");
 			while (i--) {
 				spPointDestroy(features[i]);
 			}
@@ -82,39 +63,29 @@ bool writeImageFeatures(const char* featsPath, int numOfFeats, SPPoint* features
 	int i = 0;
 	char * point_data = NULL;
 	int data_size = 0;
+	bool success = false;
 
 	assert(featsPath != NULL && features != NULL);
 
 	file = fopen(featsPath, "wb");
-	if (!file) {
-		/* TODO log */
-		return false;
-	}
+	VALIDATE_WITH_LOG(file, "Could not open feature file");
 
-	if (fwrite(&numOfFeats, sizeof(int), 1, file) != 1) {
-		/* TODO log */
-		fclose(file);
-		return false;
-	}
+	VALIDATE_WITH_LOG(fwrite(&numOfFeats, sizeof(int), 1, file) == 1, "Error writing num of features to file");
 
 	for (i = 0; i < numOfFeats; i++) {
 		data_size = spPointSerialize(features[i], &point_data);
-		if (data_size == -1) {
-			/* TODO log */
-			fclose(file);
-			return false;
-		}
+		VALIDATE_WITH_LOG(data_size != -1, "Error serializing some point");
 
-		if ((int)fwrite(point_data, 1, data_size, file) != data_size) {
-			/* TODO log */
-			fclose(file);
-			free(point_data);
-			return false;
-		}
+		VALIDATE_WITH_LOG((int)fwrite(point_data, 1, data_size, file) == data_size, "Error writing some point data to the file");
 
 		free(point_data);
+		point_data = NULL;
 	}
 
-	fclose(file);
-	return true;
+	success = true;
+
+cleanup:
+	if (point_data) free(point_data);
+	if (file) fclose(file);
+	return success;
 }
