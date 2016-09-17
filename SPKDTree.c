@@ -167,10 +167,10 @@ bool searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint p
 
 bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
-    SPListElement curr_elem = NULL, last_elem = NULL;
+    SPListElement curr_elem = NULL;
     SP_BPQUEUE_MSG enqueue_msg;
     double curr_dim_distance = 0, curr_dim_distance_squared = 0;
-    bool ret_status = true, free_last = false;
+    bool ret_status = true;
     
     if (curr == NULL){
         return false;
@@ -183,24 +183,11 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         if (curr_elem == NULL){
             return false;
         }
-        
-        //Check if the queue is full (so we'll know if we need to destroy the last element in case we inserted another element instead)
-        if (spBPQueueIsFull(bpq)){
-            last_elem = spBPQueuePeekLast(bpq);
-            free_last = true;
-        } else {
-            free_last = false;
-        }
- 
+       
         //Trying to insert the element to the queue
 		enqueue_msg = spBPQueueEnqueue(bpq, curr_elem);
-        if ( enqueue_msg == SP_BPQUEUE_SUCCESS && free_last){
-            spListElementDestroy(last_elem);
-        }
-        else if (enqueue_msg != SP_BPQUEUE_FULL){
-            spListElementDestroy(curr_elem);
-        }
-		else if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL){
+        spListElementDestroy(curr_elem);
+        if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL){
             return false;
         }
         return true;
