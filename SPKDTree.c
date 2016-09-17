@@ -197,6 +197,9 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         if ( enqueue_msg == SP_BPQUEUE_SUCCESS && free_last){
             spListElementDestroy(last_elem);
         }
+        else if (enqueue_msg != SP_BPQUEUE_FULL){
+            spListElementDestroy(curr_elem);
+        }
 		else if (enqueue_msg != SP_BPQUEUE_SUCCESS && enqueue_msg != SP_BPQUEUE_FULL){
             return false;
         }
