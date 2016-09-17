@@ -243,11 +243,11 @@ SPKDArray* split(SPKDArray kd_arr, int coor){
 	right_size = size - left_size;
     
     //Allocating indexes' arrays
-    left_indexes = (bool*)malloc(size*sizeof(int));
+    left_indexes = (bool*)malloc(size*sizeof(bool));
     if (left_indexes  == NULL){
         return NULL;
     }
-    right_indexes = (bool*)malloc(size*sizeof(int));
+    right_indexes = (bool*)malloc(size*sizeof(bool));
     if (right_indexes == NULL){
         free(left_indexes);
         return NULL;
@@ -312,13 +312,15 @@ double getSpread(SPKDArray kd_arr, int dim){
 }
 
 double getMedian(SPKDArray kd_arr, int dim){
-	int median_index = 0;
+	int median_index = 0, point_index = 0;
 	double median_value = 0;
 	median_index = kd_arr->num / 2;
-	if (kd_arr->num % 2 == ODD) {
-		median_index++;
+	if (kd_arr->num % 2 != ODD) {
+		median_index--;
 	}
-	median_value = spPointGetAxisCoor(kd_arr->arr[median_index], dim);
+	point_index = kd_arr->matrix[dim][median_index];
+	median_value = spPointGetAxisCoor(kd_arr->arr[point_index], dim);
+	
     return median_value;
 }
 

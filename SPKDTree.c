@@ -13,6 +13,7 @@
 #define RIGHT 1
 #define INIT_PREV_DIM -1
 #define EMPTY_ARR 0
+#define INVALID_VAL 0
 
 struct sp_kd_tree {
     int dim;
@@ -56,7 +57,7 @@ SPKDTree initTreeRec(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method, i
     //If size(array) = 1, creates a node
     if ( size == SINGLE_NODE ){
         tree->dim = INVALID;
-        tree->val = INVALID;
+        tree->val = INVALID_VAL;
         tree->left = NULL;
         tree->right = NULL;
         tree->data = arr[0];
@@ -128,8 +129,8 @@ SPKDTree initTree(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method) {
 }
 
 bool isLeaf(SPKDTree node){
-    //checking if a node is a leaf (it's value is INVALID)
-    if (node->val == INVALID){
+    //checking if a node is a leaf (it's dim is INVALID)
+    if (node->dim == INVALID){
         return true;
     }
     return false;
@@ -162,6 +163,7 @@ bool searchSubTree(SPKDTree search_sub, SPKDTree other, SPBPQueue bpq, SPPoint p
     return true;
 }
 
+
 bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     //Initinlaizing vars
     SPListElement curr_elem = NULL;
@@ -173,7 +175,7 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         return false;
     }
     
-    //If curr is a leaf, trying to add it to the sp
+    //If curr is a leaf, trying to add it to the queue
     if (isLeaf(curr) == true){
         curr_elem = spListElementCreate(spPointGetIndex(curr->data),
                         spPointL2SquaredDistance(p, curr->data));
@@ -188,8 +190,8 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
     }
     
     //Calculating the distance between curr and the point (in current dim)
-    curr_dim_distance = curr->val - spPointGetAxisCoor(p, curr->dim);
-    curr_dim_distance_squared = curr_dim_distance * curr_dim_distance;
+    curr_dim_distance = (curr->val - spPointGetAxisCoor(p, curr->dim));
+    curr_dim_distance_squared = (curr_dim_distance * curr_dim_distance);
     
     //Decieding which sub tree to search
     if (spPointGetAxisCoor(p, curr->dim) <= curr->val){
@@ -200,11 +202,24 @@ bool kNearestNeighbors(SPKDTree curr , SPBPQueue bpq, SPPoint p){
         ret_status = searchSubTree(curr->right, curr->left, bpq, p, curr_dim_distance_squared);
     }
     
-    if (ret_status == false){
-        return false;
-    }
-    return true;
+    return ret_status;
+} 
+
+void newSearch(SPKDTree tree, SPPoint p, SPBPQueue bpq) {
+	if (tree == NULL) {
+		return;
+	}
+	if (isLeaf(tree)) {
+		SPListElement elem = spListElementCreate(spPointGetIndex(tree->data), spPointL2SquaredDistance(p, tree->data));
+		spBPQueueEnqueue(bpq, elem);
+	}
+	else {
+		newSearch(tree->left, p, bpq);
+		newSearch(tree->right, p, bpq);
+	}
 }
+
+
 
 void destroyTree(SPKDTree tree){
     if (tree == NULL) return;
