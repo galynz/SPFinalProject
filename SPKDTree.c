@@ -95,6 +95,7 @@ SPKDTree initTreeRec(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method, i
     //Destroying the kd-arrays created in the current iteration
     destroyKdArray(splitted_kd_arr[LEFT], dim);
     destroyKdArray(splitted_kd_arr[RIGHT], dim);
+    free(splitted_kd_arr);
     return tree;
 }
 
