@@ -36,7 +36,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 	cur_place = all_data;
 	data_end = all_data + file_size;
 	while (cur_place != data_end) {
-		features[i++] = spPointDeserialize(cur_place, &cur_place);
+		features[i] = spPointDeserialize(cur_place, &cur_place);
 		if (!features[i]) {
 			LOG_ERROR("Error deserializing some point");
 			while (i--) {
@@ -44,6 +44,7 @@ SPPoint* readImageFeatures(const char* featsPath, int* numOfFeats) {
 			}
 			goto cleanup;
 		}
+		i++;
 	}
 	
 	success = true;
