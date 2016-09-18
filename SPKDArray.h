@@ -16,7 +16,7 @@ typedef struct sp_kd_array *SPKDArray;
  * 
  * @param arr - an array of SPPoints, all with the same number of coordinates.
  * @param size - the number of SPPoints in arr.
- * @return NULL if unless size <= 0 or dim <= 0
+ * @return NULL if size <= 0 or dim <= 0
  * or not all the points have the same dim
  * or memory allocation failed. Otherwise return SPKDArray.
  */

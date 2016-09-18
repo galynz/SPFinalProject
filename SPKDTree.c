@@ -50,7 +50,6 @@ SPKDTree initTreeRec(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method, i
     
     tree = (SPKDTree)malloc(sizeof(*tree));
     if (tree==NULL){
-        //TODO: add logger comment
         return NULL;
     }
     
@@ -105,7 +104,6 @@ SPKDTree initTree(SPPoint* arr, int size, KDTREE_SPLIT_METHOD split_method) {
 	int dim = 0;
 
 	if (size <= EMPTY_ARR) {
-		//TODO: add logger comment
 		return NULL;
 	}
 

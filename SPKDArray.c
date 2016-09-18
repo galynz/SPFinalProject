@@ -22,6 +22,9 @@ struct KDArrayDimCoor {
     int index;
 };
 
+/**
+ A helper function that compares between two KDArrayDimCoor structs (according to their value in the coor field).
+ */
 static int compareKDArrayDimCoor(const void * a, const void * b) {
 	const struct KDArrayDimCoor* a_point_coor = (struct KDArrayDimCoor*)a;
 	const struct KDArrayDimCoor* b_point_coor = (struct KDArrayDimCoor*)b;
@@ -74,12 +77,13 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 	all_size = kd_arr->num;
 	dim = kd_arr->dim;
 
-	//Creating sub array of points
+	//Creating a sub array of points
 	sub_pos = 0;
 	sub_arr = (SPPoint*)malloc(sub_size * sizeof(SPPoint));
 	if (sub_arr == NULL) {
 		return NULL;
 	}
+	//Mapping old indexes to new indexes
     map_index_arr = (int*)malloc(all_size * sizeof(int));
     if (map_index_arr == NULL){
         free(sub_arr);
@@ -104,7 +108,7 @@ static SPKDArray createKdArraySubArray(SPKDArray kd_arr, bool* index_arr, int su
 	}
     
     for (i=0; i<dim; i++){
-        //Allocating the i-th row in sub matrix
+        //Allocating the i-th row in the sub matrix
 		sub_kd_array->matrix[i] = (int*)malloc(sub_size * sizeof(int));
 		if (sub_kd_array->matrix[i] == NULL) {
 			destroyKdArray(sub_kd_array, i);
@@ -294,6 +298,7 @@ double getSpread(SPKDArray kd_arr, int dim){
 	double max_value, min_value;
     min_index = kd_arr->matrix[dim][0];
     max_index = kd_arr->matrix[dim][kd_arr->num-1];
+	//Getting the min and max values of this dim
     min_value = spPointGetAxisCoor(kd_arr->arr[min_index], dim);
     max_value = spPointGetAxisCoor(kd_arr->arr[max_index], dim);
     return (max_value - min_value);
@@ -306,6 +311,7 @@ double getMedian(SPKDArray kd_arr, int dim){
 	if (kd_arr->num % 2 != ODD) {
 		median_index--;
 	}
+	//Getting the value of the point in the median index in matrix[dim]
 	point_index = kd_arr->matrix[dim][median_index];
 	median_value = spPointGetAxisCoor(kd_arr->arr[point_index], dim);
 	
